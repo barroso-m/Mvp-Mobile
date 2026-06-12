@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(adb devices *)",
+      "Bash(npm show *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(wdio run *)",
+      "Bash(node -e \"const p = require\\('./node_modules/@wdio/allure-reporter/package.json'\\); console.log\\(p.version\\)\")",
+      "Bash(node -e 'const r=require\\('\\\\''./__TRACKED_VAR__'\\\\''\\); console.log\\('\\\\''status:'\\\\'', r.status, '\\\\''| attachments:'\\\\'', r.attachments?.map\\(a=>a.name+'\\\\'' \\('\\\\''+a.type+'\\\\''\\)'\\\\''\\).join\\('\\\\'', '\\\\''\\)\\)')",
+      "Bash(node -e \"require\\('rimraf'\\)\")",
+      "Bash(npx wdio *)"
+    ]
+  }
+}

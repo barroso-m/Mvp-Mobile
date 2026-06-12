@@ -1,0 +1,21 @@
+node_modules/
+
+# Binarios de la app — entregar por canal seguro, no versionar
+apps/*.apk
+apps/*.ipa
+apps/*.app
+
+# Credenciales de prueba
+.env
+
+# Logs generados por Appium y WDIO
+logs/
+*.log
+
+# Allure
+allure-results/
+allure-report/
+
+# OS
+.DS_Store
+Thumbs.db

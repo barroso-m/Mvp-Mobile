@@ -2,7 +2,7 @@
 
 Automatización mobile con **WebdriverIO v9 + Appium** para la app **IntraMed**.
 
-Esta guía está pensada para que cualquier persona, técnica o no, pueda dejar todo listo desde cero en una máquina Windows: instalar las herramientas, configurar las variables de entorno, levantar el emulador, inspeccionar la app y finalmente correr los tests.
+Guía pensada para seguir los pasos y dejar todo listo desde cero en una máquina Windows: instalar las herramientas, configurar las variables de entorno, levantar el emulador, inspeccionar la app y finalmente correr los tests.
 
 ---
 

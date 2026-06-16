@@ -1,4 +1,4 @@
-import { config as androidConfig } from './wdio.android.conf';
+import { config as androidConfig } from './wdio.android.conf'
 
 export const config: Record<string, any> = {
   ...androidConfig,
@@ -6,4 +6,4 @@ export const config: Record<string, any> = {
     ...cap,
     'appium:avdArgs': '-no-window -no-snapshot-load -no-audio',
   })),
-};
+}

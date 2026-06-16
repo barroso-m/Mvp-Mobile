@@ -4,18 +4,33 @@
   "description": "Automatización mobile con WebdriverIO v9 + Appium — Piloto IntraMed",
   "private": true,
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "test:android": "wdio run config/wdio.android.conf.ts && npm run report:open || npm run report:open",
     "test:android:headless": "wdio run config/wdio.android.headless.conf.ts && npm run report:open || npm run report:open",
     "test:android:login": "wdio run config/wdio.android.conf.ts --mochaOpts.grep \"\\[#login\\]\" && npm run report:open || npm run report:open",
     "test:android:feed": "wdio run config/wdio.android.conf.ts --mochaOpts.grep \"\\[#feed\\]\" && npm run report:open || npm run report:open",
+    "test:android:profile": "wdio run config/wdio.android.conf.ts --mochaOpts.grep \"\\[#profile\\]\" && npm run report:open || npm run report:open",
     "test:ios": "wdio run config/wdio.ios.conf.ts",
     "appium": "appium",
     "report:generate": "npx allure generate allure-results --clean -o allure-report",
     "report:open": "npx allure open allure-report",
-    "report": "npm run report:generate && npm run report:open"
+    "report": "npm run report:generate && npm run report:open",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@types/mocha": "^10",
@@ -30,8 +45,17 @@
     "allure-commandline": "^2.42.1",
     "appium-uiautomator2-driver": "^3",
     "dotenv": "^16",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-wdio": "^9.28.0",
     "expect-webdriverio": "^5",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.7.0",
+    "lint-staged": "^17.0.7",
+    "prettier": "^3.8.4",
     "ts-node": "^10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "typescript-eslint": "^8.61.1"
   }
 }

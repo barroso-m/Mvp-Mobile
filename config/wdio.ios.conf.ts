@@ -1,5 +1,5 @@
-import path from 'path';
-import { config as sharedConfig } from './wdio.shared.conf';
+import path from 'path'
+import { config as sharedConfig } from './wdio.shared.conf'
 
 export const config: Record<string, any> = {
   ...sharedConfig,
@@ -30,4 +30,4 @@ export const config: Record<string, any> = {
       'appium:wdaLaunchTimeout': 120000,
     },
   ],
-};
+}

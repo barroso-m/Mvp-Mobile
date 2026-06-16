@@ -11,7 +11,20 @@
       "Bash(node -e 'const r=require\\('\\\\''./__TRACKED_VAR__'\\\\''\\); console.log\\('\\\\''status:'\\\\'', r.status, '\\\\''| attachments:'\\\\'', r.attachments?.map\\(a=>a.name+'\\\\'' \\('\\\\''+a.type+'\\\\''\\)'\\\\''\\).join\\('\\\\'', '\\\\''\\)\\)')",
       "Bash(node -e \"require\\('rimraf'\\)\")",
       "Bash(npx wdio *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(tee /tmp/profile-run.log)",
+      "Bash(awk '/\\\\[DIAG\\\\] === PageSource NATIVO FINAL/,/\\\\[DIAG\\\\] Detenido/' /tmp/profile-run.log)",
+      "Bash(grep -oE 'resource-id=\"[^\"]+\"|text=\"[^\"]{1,40}\"|content-desc=\"[^\"]{1,40}\"')",
+      "Bash(awk *)",
+      "Bash(tee /tmp/full-run.log)",
+      "Bash(tee /tmp/profile-clean.log)",
+      "Bash(grep *)",
+      "Bash(tee /tmp/full-clean.log)",
+      "Bash(tee /tmp/install-lint.log)",
+      "Bash(npx husky *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(tee /tmp/post-lint.log)"
     ]
   }
 }

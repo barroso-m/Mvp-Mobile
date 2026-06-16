@@ -5,19 +5,8 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": [
-      "node",
-      "@wdio/globals/types",
-      "expect-webdriverio",
-      "mocha"
-    ]
+    "types": ["node", "@wdio/globals/types", "expect-webdriverio", "mocha"]
   },
-  "include": [
-    "src/**/*",
-    "config/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*", "config/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -2,6 +2,11 @@ import 'dotenv/config'
 import fs from 'fs'
 import { execSync } from 'child_process'
 import AllureReporter from '@wdio/allure-reporter'
+import {
+  recordResult,
+  resetResults,
+  uploadResults,
+} from '../src/utils/zephyr-reporter'
 
 export const config: Record<string, any> = {
   runner: 'local',
@@ -26,9 +31,10 @@ export const config: Record<string, any> = {
   ],
   onPrepare: function () {
     fs.rmSync('allure-results', { recursive: true, force: true })
+    resetResults()
   },
 
-  onComplete: function () {
+  onComplete: async function () {
     try {
       execSync('npx allure generate allure-results --clean -o allure-report', {
         stdio: 'inherit',
@@ -36,6 +42,7 @@ export const config: Record<string, any> = {
     } catch (err) {
       console.error('No se pudo generar el reporte de Allure:', err)
     }
+    await uploadResults()
   },
 
   waitforTimeout: 15000,
@@ -48,9 +55,9 @@ export const config: Record<string, any> = {
   },
 
   afterTest: async function (
-    _test: unknown,
+    test: { title: string },
     _context: unknown,
-    { passed }: { passed: boolean },
+    { passed, duration }: { passed: boolean; duration: number },
   ) {
     const screenshot = await browser.takeScreenshot()
     const video = await driver.stopRecordingScreen()
@@ -67,5 +74,7 @@ export const config: Record<string, any> = {
         'video/mp4',
       )
     }
+
+    recordResult(test.title, passed, duration)
   },
 }

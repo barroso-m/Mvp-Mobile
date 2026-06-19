@@ -24,7 +24,18 @@
       "Bash(npx husky *)",
       "Bash(npx eslint *)",
       "Bash(npx prettier *)",
-      "Bash(tee /tmp/post-lint.log)"
+      "Bash(tee /tmp/post-lint.log)",
+      "WebSearch",
+      "WebFetch(domain:support.smartbear.com)",
+      "WebFetch(domain:zephyr-squad-cloud-v1.sb-docs.com)",
+      "WebFetch(domain:smartbear.portal.swaggerhub.com)",
+      "WebFetch(domain:developer.smartbear.com)",
+      "WebFetch(domain:zephyr-squad.sb-docs.com)",
+      "WebFetch(domain:zephyrsquad.docs.apiary.io)",
+      "WebFetch(domain:zephyrdocs.atlassian.net)",
+      "WebFetch(domain:community.smartbear.com)",
+      "Bash(node *)",
+      "Bash(git add *)"
     ]
   }
 }

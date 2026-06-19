@@ -16,6 +16,9 @@ logs/
 allure-results/
 allure-report/
 
+# Zephyr (resultados intermedios para upload)
+.zephyr-results.json
+
 # OS
 .DS_Store
 Thumbs.db

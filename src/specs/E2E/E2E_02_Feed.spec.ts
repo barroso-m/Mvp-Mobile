@@ -5,7 +5,7 @@ import { step } from '../../utils/logger'
 const POST_TEXT = `post automation mobile ${Date.now()}`
 
 describe('[#feed] Feed', () => {
-  it('TC02 - crear post con imagen y texto, validar toast y publicación en feed', async () => {
+  it('TC03 [IE-T28] - crear post con imagen y texto, validar toast y publicación en feed', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -27,7 +27,7 @@ describe('[#feed] Feed', () => {
     )
   })
 
-  it('TC03 - reaccionar al post creado en TC02', async () => {
+  it('TC04 [IE-T29] - reaccionar al post creado en TC03', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

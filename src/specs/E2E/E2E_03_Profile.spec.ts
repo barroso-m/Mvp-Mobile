@@ -6,7 +6,7 @@ const EMAIL = process.env.TEST_EMAIL!
 const PASSWORD = process.env.TEST_PASSWORD!
 
 describe('[#profile] Profile', () => {
-  it('TC03 - llegar a la web de Gestión de cuenta y validar el botón de eliminar cuenta', async () => {
+  it('TC05 [IE-T30] - llegar a la web de Gestión de cuenta y validar el botón de eliminar cuenta', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

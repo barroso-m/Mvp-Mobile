@@ -6,7 +6,7 @@ const EMAIL = process.env.TEST_EMAIL!
 const PASSWORD = process.env.TEST_PASSWORD!
 
 describe('[#login] Login', () => {
-  it('TC01 - login inválido muestra mensaje de error', async () => {
+  it('TC01 [IE-T26] - login inválido muestra mensaje de error', async () => {
     await step('Esperar pantalla de login', () =>
       LoginPage.waitForScreenReady(),
     )
@@ -18,7 +18,7 @@ describe('[#login] Login', () => {
     })
   })
 
-  it('TC02 - login exitoso con credenciales válidas', async () => {
+  it('TC02 [IE-T27] - login exitoso con credenciales válidas', async () => {
     await step('Login con credenciales válidas', () =>
       LoginPage.login(EMAIL, PASSWORD),
     )

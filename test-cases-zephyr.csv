@@ -1,0 +1,25 @@
+Name,Status,Priority,Labels,Objective,Precondition,Step,Test Data,Expected Result
+TC01 - Login mobile fallido con usuario inexistente,Draft,Medium,login;mobile,Verificar que la app móvil de IntraMed muestra un mensaje de error al intentar iniciar sesión con credenciales inválidas,"App IntraMed instalada en Android (Pixel API 34). Usuario sin sesión iniciada. Appium server activo.",Abrir la app IntraMed y esperar la pantalla de login,,"Se muestra la pantalla de login con los campos ""Email / Usuario"", ""Contraseña"" y el botón ""Iniciar sesión"""
+,,,,,,"Ingresar un usuario inexistente en el campo ""Email / Usuario""",test,El campo se completa con el valor ingresado
+,,,,,,Ingresar una contraseña cualquiera en el campo Contraseña,Aa123456!,El campo se completa con la contraseña ingresada
+,,,,,,"Hacer tap en el botón ""Iniciar sesión""",,"Se muestra el mensaje de error de credenciales inválidas y el usuario permanece en la pantalla de login"
+TC02 - Login mobile exitoso con credenciales válidas,Draft,High,login;mobile,Verificar que el usuario puede iniciar sesión en la app móvil de IntraMed con credenciales válidas y acceder al feed autenticado,"App IntraMed instalada en Android (Pixel API 34). Usuario con credenciales QA válidas. Appium server activo.",Abrir la app IntraMed y esperar la pantalla de login,,La pantalla de login se muestra correctamente
+,,,,,,"Ingresar el email válido en el campo ""Email / Usuario""",martin.barroso@conexa.ai,El campo se completa con el email ingresado
+,,,,,,Ingresar la contraseña válida en el campo Contraseña,[contraseña válida],El campo se completa con la contraseña
+,,,,,,"Hacer tap en el botón ""Iniciar sesión""",,"La app autentica al usuario, redirige al feed y se muestra el botón ""Crear"" visible en la pantalla"
+TC03 - Crear post mobile con imagen y texto,Draft,High,feed;mobile,Verificar el flujo completo de creación de una publicación con imagen y texto desde la app móvil y su correcta visualización en el feed,"Usuario logueado en la app IntraMed. Feed accesible. Permisos de galería otorgados a la app.",Esperar que el feed esté listo,,"El botón ""Crear"" es visible en la pantalla del feed"
+,,,,,,"Hacer tap en el botón ""Crear""",,Se abre la pantalla de creación de post
+,,,,,,"Hacer tap en ""Seleccionar imagen""",,Se abre la galería del dispositivo
+,,,,,,Seleccionar la primera imagen disponible de la galería,,"La imagen se agrega al post y el botón ""Cambiar imagen"" queda visible"
+,,,,,,Escribir el contenido del post en el editor de texto,post automation mobile [timestamp],El texto se visualiza correctamente en el editor
+,,,,,,"Hacer tap en el botón ""Siguiente""",,Se avanza al paso de confirmación y el botón ""Publicar"" queda visible
+,,,,,,"Hacer tap en el botón ""Publicar""",,"Se muestra un toast de éxito de publicación y, tras volver al feed (con pull-to-refresh si hace falta), el post recién creado aparece visible"
+TC04 - Reaccionar a un post recién publicado en el feed,Draft,Medium,feed;mobile,Verificar que un usuario logueado puede reaccionar (like) a un post recién publicado desde la app móvil,"Usuario logueado en la app IntraMed. Existe un post propio recién creado (TC03) visible en el feed.",Asegurar que el usuario está logueado y el feed está listo,,Feed visible con el botón Crear disponible
+,,,,,,Localizar el post creado en TC03 dentro del feed (con pull-to-refresh / scroll si hace falta),post automation mobile [timestamp],El post aparece visible en el feed
+,,,,,,Hacer tap en el botón de reacción asociado al post,,"La reacción se registra correctamente y el estado del botón / contador refleja el like"
+TC05 - Validar acceso a web Gestión de cuenta desde el perfil,Draft,Medium,profile;mobile;webview,"Verificar que desde el perfil de la app móvil se puede acceder a la web externa ""Gestión de cuenta"" y que el botón ""Eliminar cuenta"" se muestra correctamente","Usuario logueado en la app IntraMed con credenciales QA válidas. Conexión a la web QA disponible.","Hacer tap en el botón ""Perfil"" desde la barra de navegación inferior",,Se abre la pantalla de perfil del usuario
+,,,,,,"Hacer tap en el botón ""Configuración""",,Se abre la pantalla de configuración de cuenta
+,,,,,,"Hacer tap en la opción ""Eliminar cuenta""",,Se abre la web externa de gestión de cuenta (Chrome / webview)
+,,,,,,"Si la web solicita login, ingresar credenciales válidas y enviar el formulario","Email: martin.barroso@conexa.ai, Contraseña: [contraseña válida]",La web autentica al usuario y muestra la pantalla autenticada
+,,,,,,"Validar que el título ""Gestión de cuenta"" se muestra en la web",,El título es visible en la pantalla
+,,,,,,"Validar que el botón ""Eliminar cuenta"" se muestra en la web (sin hacer click)",,El botón es visible y disponible para el usuario

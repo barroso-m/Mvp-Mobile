@@ -211,6 +211,53 @@ Abrir el emulador desde Android Studio (paso 3) y esperar a que la pantalla de i
 
 Al terminar la suite, Allure abre automáticamente un reporte HTML con todos los pasos, capturas y videos. El reporte queda guardado en `allure-report/index.html` por si querés volver a abrirlo después.
 
+### 5.9. Configurar la subida a Zephyr (opcional)
+
+Al terminar la corrida, el proyecto puede subir los resultados automáticamente a **Zephyr Essential** (el sistema de gestión de pruebas que usa el equipo en Jira). Esto crea un ciclo nuevo dentro de una carpeta del proyecto y registra cada caso con su estado (Pass / Fail).
+
+**Si no completás estas variables, los tests corren igual** — simplemente se omite la subida y aparece un mensaje en consola avisando.
+
+#### 5.9.1. Variables a configurar en `.env`
+
+```env
+# Zephyr config
+ZEPHYR_PROJECT_KEY=IE
+ZEPHYR_FOLDER_ID=46522900
+ZEPHYR_AUTH_TOKEN=eyJ0eXAi...
+```
+
+| Variable             | Qué es                                                                                    | Cómo conseguirlo                                                                                                                                                                                                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ZEPHYR_PROJECT_KEY` | El prefijo del proyecto en Jira/Zephyr. Para IntraMed mobile es `IE`                      | En Jira, abrir el proyecto y mirar el prefijo de cualquier issue (ej: `IE-123`)                                                                                                                                                                                                    |
+| `ZEPHYR_FOLDER_ID`   | El ID numérico de la carpeta dentro de Zephyr donde van a aparecer los ciclos automáticos | En Zephyr Essential → "Ciclos de prueba" → click derecho sobre la carpeta deseada → "Editar carpeta". El ID aparece en la URL del navegador (`...folderId=46522900`). Si no querés que vaya a ninguna carpeta puntual, dejar la variable vacía y el ciclo va a aparecer en la raíz |
+| `ZEPHYR_AUTH_TOKEN`  | Token JWT que autoriza al proyecto a crear ciclos y ejecuciones                           | En Jira: foto de perfil arriba a la derecha → "Apps" → "Zephyr Essential" → "API Access Tokens" → "Generate new token". Pegar el JWT completo (sin el prefijo `Bearer`). El token tiene fecha de expiración — si se vence, regenerarlo                                             |
+
+#### 5.9.2. Mapear cada `it(...)` con un caso de Zephyr
+
+Para que la subida sepa a qué caso corresponde cada test, el título del `it(...)` tiene que incluir la **clave del caso de Zephyr** entre corchetes, con el formato `[XX-Tnnn]`:
+
+```ts
+it('TC01 [IE-T26] - login inválido muestra mensaje de error', async () => { ... })
+```
+
+> Si el caso aún no existe en Zephyr, primero crearlo (manualmente o importando un CSV con el formato de Zephyr) y después poner el tag con la key que asignó Zephyr en el `it(...)`. Tests sin tag `[XX-Tnnn]` se ejecutan igual pero no se suben.
+
+#### 5.9.3. Qué pasa después de cada corrida
+
+Al final de `npm run test:android` (o cualquier variante), si las tres variables están configuradas, vas a ver en consola algo así:
+
+```
+[zephyr] Creando ciclo "Mobile Run — 19/6/2026 01:58:08"
+[zephyr] Tests: 5 (✅ 5 / ❌ 0)
+[zephyr] Ciclo creado: IE-R9
+  ✅ IE-T26: Pass
+  ✅ IE-T27: Pass
+  ...
+[zephyr] Subida completada.
+```
+
+En Zephyr, dentro de la carpeta configurada, va a aparecer un ciclo nuevo (`IE-R9` en el ejemplo) con las ejecuciones del run.
+
 ---
 
 ## 6. Estructura del proyecto
@@ -249,11 +296,14 @@ allure-report/              Reporte HTML generado
 
 ## 8. Solución de problemas comunes
 
-| Síntoma                                            | Posible causa                                                  | Cómo arreglar                                                                     |
-| -------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `adb` no se reconoce como comando                  | El `Path` no incluye `platform-tools`                          | Volver a la sección 2.3 y verificar                                               |
-| Appium no encuentra el emulador                    | El emulador no está prendido o el ID es otro                   | Correr `adb devices`, ajustar `deviceName` si hace falta                          |
-| El test queda colgado esperando un elemento        | El locator cambió en la última versión de la app               | Abrir Appium Inspector (sección 4) y buscar el nuevo ID                           |
-| El test pasa una vez y después falla siempre       | La app quedó en una pantalla intermedia de la corrida anterior | Cerrar y volver a abrir el emulador                                               |
-| `Cannot find module` al correr `npm install`       | Falta la versión correcta de Node                              | Verificar con `node --version` que coincide con `.nvmrc`. Si no, correr `nvm use` |
-| `No hay ningún .apk en ./apps` al correr los tests | Falta el APK en la carpeta                                     | Volver a la sección 5.6 y copiar el `.apk` ahí                                    |
+| Síntoma                                                  | Posible causa                                                  | Cómo arreglar                                                                                 |
+| -------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `adb` no se reconoce como comando                        | El `Path` no incluye `platform-tools`                          | Volver a la sección 2.3 y verificar                                                           |
+| Appium no encuentra el emulador                          | El emulador no está prendido o el ID es otro                   | Correr `adb devices`, ajustar `deviceName` si hace falta                                      |
+| El test queda colgado esperando un elemento              | El locator cambió en la última versión de la app               | Abrir Appium Inspector (sección 4) y buscar el nuevo ID                                       |
+| El test pasa una vez y después falla siempre             | La app quedó en una pantalla intermedia de la corrida anterior | Cerrar y volver a abrir el emulador                                                           |
+| `Cannot find module` al correr `npm install`             | Falta la versión correcta de Node                              | Verificar con `node --version` que coincide con `.nvmrc`. Si no, correr `nvm use`             |
+| `No hay ningún .apk en ./apps` al correr los tests       | Falta el APK en la carpeta                                     | Volver a la sección 5.6 y copiar el `.apk` ahí                                                |
+| `[zephyr] Faltan ZEPHYR_AUTH_TOKEN o ZEPHYR_PROJECT_KEY` | Las variables de Zephyr no están en el `.env`                  | Configurar las variables de la sección 5.9 — o ignorar el mensaje si no querés subir a Zephyr |
+| `[zephyr] No se pudo crear el ciclo (status 401)`        | El `ZEPHYR_AUTH_TOKEN` venció o es inválido                    | Regenerar el token desde Zephyr Essential → "API Access Tokens" y pegar el nuevo en `.env`    |
+| `[zephyr] No se pudo crear el ciclo (status 400)`        | `ZEPHYR_FOLDER_ID` apunta a una carpeta que no existe          | Verificar el ID de la carpeta en la URL de Zephyr o dejar la variable vacía para usar la raíz |

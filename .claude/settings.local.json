@@ -35,7 +35,12 @@
       "WebFetch(domain:zephyrdocs.atlassian.net)",
       "WebFetch(domain:community.smartbear.com)",
       "Bash(node *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(emulator -list-avds)",
+      "Bash(gh release *)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -sL \"https://api.github.com/repos/webdriverio/native-demo-app/releases/latest\")",
+      "Bash(mkdir -p logs)"
     ]
   }
 }

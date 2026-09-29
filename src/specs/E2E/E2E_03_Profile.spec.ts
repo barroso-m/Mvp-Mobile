@@ -154,7 +154,15 @@ describe('[#profile] Profile', () => {
     }
   })
 
-  it('TC27 [IE-T41] - editar datos personales desde configuración', async () => {
+  it('TC27 [IE-T41] - editar datos personales desde configuración', async function () {
+    // 5 etapas secuenciales (navegar + actualizar + validar reingresando +
+    // restaurar), cada una con su propia navegación completa. El timeout
+    // global de mocha (120s) alcanza de sobra en un emulador respondiendo
+    // normal, pero en un día lento (2026-09-08: 17-47s por etapa) corta el
+    // test a mitad de la última etapa sin que sea un bug real — se
+    // comprobó corriendo el test aislado y con el emulador recién
+    // reiniciado. Más margen acá en vez de tocar el timeout global.
+    this.timeout(240000)
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -168,30 +176,58 @@ describe('[#profile] Profile', () => {
     await step(`Actualizar teléfono a "${numeroNuevo}"`, () =>
       ProfilePage.actualizarTelefono(numeroNuevo),
     )
-    // Al guardar, la app navega automáticamente de vuelta a "Cuenta" — el
-    // toast es transitorio y no siempre alcanza a capturarse. Se valida la
-    // persistencia real reingresando a Datos personales y leyendo el campo.
+    // Al guardar, la app navega automáticamente de vuelta a "Cuenta" con
+    // latencia variable. Reingresar a Datos personales confiando en la
+    // detección "ya estoy en Cuenta/Datos personales" (irADatosPersonales
+    // idempotente) resultó una carrera contra esa navegación automática —
+    // el tap a veces cae mientras la transición todavía está en curso. Más
+    // confiable: repetir el mismo camino limpio que el primer llamado
+    // (asegurarSesionEnFeed + irADatosPersonales desde cero), que siempre
+    // funciona porque no depende de en qué momento exacto de esa transición
+    // se ejecuta.
     await step('Validar que se guardó correctamente', async () => {
+      await asegurarSesionEnFeed()
       await ProfilePage.irADatosPersonales()
-      // No usar toHaveText ni un solo scrollHastaTelefono() de antemano: esta
-      // pantalla re-renderiza seguido después de guardar, así que una
-      // posición de scroll medida una sola vez puede quedar desactualizada.
-      // Re-scrollear y re-consultar el getter fresco en cada vuelta del
-      // polling en vez de fijar la posición/el elemento una única vez.
+      await ProfilePage.scrollHastaTelefono()
+      // No usar toHaveText: cachea el elemento resuelto y esta pantalla puede
+      // re-renderizar después de guardar, dejándolo stale. OJO: NO llamar acá
+      // a scrollHastaTelefono() en cada vuelta del polling — ya se probó y
+      // cada llamada puede disparar hasta 12 scrollGestures; repetido cada
+      // pocos cientos de ms terminó colgando el proceso de instrumentación
+      // de UiAutomator2 (2026-09-08). Un solo scroll previo alcanza.
       await browser.waitUntil(
         async () => {
-          await ProfilePage.scrollHastaTelefono()
           const texto = await ProfilePage.inputTelefonoNumero
             .getText()
             .catch(() => null)
           return texto === numeroNuevo
         },
-        { timeout: 20000, interval: 300 },
+        { timeout: 10000, interval: 500 },
       )
     })
-    await step('Restaurar el teléfono original', () =>
-      ProfilePage.actualizarTelefono(numeroOriginal),
-    )
+    // Housekeeping, no parte de lo que este test valida (eso ya se demostró
+    // arriba en "Validar que se guardó correctamente"). Reintenta una
+    // navegación completa de más al detectar la misma falla intermitente de
+    // SideMenuPage.abrir() que "Validar" ya no sufre — sin diagnóstico
+    // 100% cerrado todavía (ver PENDIENTES.md) — pero no debe tumbar el test
+    // ni dejar el dato sucio para el próximo test si el propio reintento
+    // también falla: lo avisa por consola en vez de fallar la suite.
+    await step('Restaurar el teléfono original', async () => {
+      try {
+        await asegurarSesionEnFeed()
+        await ProfilePage.actualizarTelefono(numeroOriginal)
+      } catch {
+        try {
+          await asegurarSesionEnFeed()
+          await ProfilePage.actualizarTelefono(numeroOriginal)
+        } catch (err2) {
+          console.warn(
+            `TC27: no se pudo restaurar el teléfono original (${numeroOriginal}) tras 2 intentos — quedó en "${numeroNuevo}". Restaurarlo a mano si hace falta.`,
+            err2,
+          )
+        }
+      }
+    })
   })
 
   it('TC28 [IE-T42] - toggle switch de Newsletter y persistir', async () => {

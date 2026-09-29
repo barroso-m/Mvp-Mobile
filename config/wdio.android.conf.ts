@@ -49,6 +49,12 @@ export const config: Record<string, any> = {
       'appium:newCommandTimeout': 240,
       'appium:uiautomator2ServerLaunchTimeout': 60000,
       'appium:chromeOptions': { args: ['--disable-gpu'] },
+      'appium:disableWindowAnimation': true,
+      // Antes de resolver cada comando, UiAutomator2 espera a que la app quede
+      // "idle". El feed reproduce video en loop, así que nunca lo está y cada
+      // findElement pagaba los 10s del default; con búsquedas negativas (que
+      // recorren el árbol entero) eso escaló a 52s y mató la instrumentación.
+      'appium:settings[waitForIdleTimeout]': 100,
     },
   ],
 }

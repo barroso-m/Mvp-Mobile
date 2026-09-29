@@ -6,14 +6,18 @@ export const CampusLocators = {
   seccionRecomendados: '//*[@text="Recomendados para vos"]',
   seccionMasFormaciones: '//*[@text="Más formaciones disponibles"]',
   bannerExplorar: '//*[contains(@text, "Explorar toda la Oferta")]',
-  btnExplorarCatalogo: '~Explorar catálogo',
-  btnVerCurso: '~Ver curso',
+  btnExplorarCatalogo: '//*[contains(@text, "Explorar catálogo")]',
+  btnVerMas: '//*[contains(@text, "Ver más")]',
   badgeInscripto: '//*[@text="INSCRIPTO"]',
   btnVolverHeader: '//android.widget.ImageButton[@content-desc="Navigate up"]',
+  btnGoBack:
+    '//android.widget.Button[@content-desc="Go back"] | //android.widget.Button[@content-desc="Go back"]/android.widget.ImageView',
   tagOfertaAcademicaDetalle: '//*[@text="Oferta académica"]',
   contenidoAutor: '//*[contains(@text, "Autor")]',
   cardPorTitulo: (titulo: string) =>
     `//android.view.ViewGroup[contains(@content-desc, "${titulo}")]`,
-  btnVerCursoPorTitulo: (titulo: string) =>
-    `//android.view.ViewGroup[contains(@content-desc, "${titulo}")]//*[@content-desc="Ver curso"]`,
+  btnVerMasPorTitulo: (titulo: string) =>
+    `//android.view.ViewGroup[contains(@content-desc, "${titulo}")]//*[@content-desc="Ver más"]`,
+  // Card del catálogo: cada item tiene content-desc con formato "<autor>. <título>."
+  cardCatalogo: '//android.view.ViewGroup[contains(@content-desc, ". ")]',
 } as const

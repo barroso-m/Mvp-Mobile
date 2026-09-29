@@ -1,6 +1,9 @@
 export const ProfileLocators = {
   // Sobre mí
-  seccionSobreMi: '//*[@text="Sobre mi"]',
+  // La app renderiza "Sobre mí" CON tilde (verificado en el device el
+  // 2026-09-16). El locator decía "Sobre mi" sin tilde y por eso TC24 fallaba
+  // con el perfil correctamente cargado en pantalla.
+  seccionSobreMi: '//*[@text="Sobre mí"]',
   lapizSobreMi: '~Editar sobre mí',
   inputSobreMi: '//android.widget.EditText',
   // La pantalla de edición es full-screen (no modal): "Guardar cambios" persiste,
@@ -11,6 +14,13 @@ export const ProfileLocators = {
 
   // Perfil: actividad y secciones
   btnVerMasActividad: '~Ver más actividad',
+  // Entrada de "Mi actividad reciente". Su content-desc es
+  // "Publicaste · <hace cuánto>, <texto del post>", así que se ancla por el
+  // prefijo del texto. Es la única superficie donde un post propio aparece de
+  // forma determinística: el feed de Inicio es algorítmico y no lo garantiza
+  // (ver PENDIENTES.md, 2026-09-15).
+  entradaActividadPorPrefijo: (prefijo: string) =>
+    `//android.view.ViewGroup[contains(@content-desc, "${prefijo}")]`,
   // No existe un botón "Agregar sección" propio: la tarjeta vacía de
   // "información profesional" (debajo de Instituciones) tiene el CTA
   // "Comenzar", que abre el mismo modal "Agregar una sección". Solo aparece
@@ -18,6 +28,13 @@ export const ProfileLocators = {
   // OJO: "Comenzar" NO es accessibility-id único en la pantalla — más abajo
   // hay otro botón con la misma etiqueta que abre "Crear publicación". Se
   // ancla por texto único de la tarjeta para no ambigüar.
+  // Título de la tarjeta de información profesional. Se scrollea hasta ÉL y no
+  // hasta el botón: el perfil virtualiza: si uno se pasa de largo, la tarjeta
+  // deja de estar renderizada y `following::Button[1]` pasa a resolver al OTRO
+  // "Comenzar" (el que abre "Crear publicación"), que es lo que hacía que TC25
+  // terminara en el composer en vez de en el modal (2026-09-16).
+  tituloInfoProfesional:
+    '//*[@text="Aún no cargaste tu información profesional"]',
   btnComenzarSeccionProfesional:
     '//*[@text="Aún no cargaste tu información profesional"]/following::android.widget.Button[1]',
   headingAgregarSeccion: '//*[@text="Agregar una sección"]',

@@ -4,6 +4,10 @@ import { webPage } from '../../locators/webPage.locators'
 import { ProfileLocators } from '../../locators/profile.locators'
 import SideMenuPage from './SideMenuPage-Intramed'
 
+/** Alto del bottom nav fijo del emulador (items en y=1684..1826 sobre una
+ * pantalla de 1920). Se usa para no tocar elementos que quedan debajo. */
+const ALTO_BOTTOM_NAV = 236
+
 class ProfilePage extends BasePage {
   get btnPerfil() {
     return $(FeedLocators.btnPerfil)
@@ -105,6 +109,9 @@ class ProfilePage extends BasePage {
 
   get btnVerMasActividad() {
     return $(ProfileLocators.btnVerMasActividad)
+  }
+  get tituloInfoProfesional() {
+    return $(ProfileLocators.tituloInfoProfesional)
   }
   get btnComenzarSeccionProfesional() {
     return $(ProfileLocators.btnComenzarSeccionProfesional)
@@ -376,15 +383,45 @@ class ProfilePage extends BasePage {
     await this.tap(el)
   }
 
+  entradaActividad(prefijo: string) {
+    return $(ProfileLocators.entradaActividadPorPrefijo(prefijo))
+  }
+
+  /**
+   * Abre el detalle de un post propio desde "Mi actividad reciente".
+   *
+   * Es el camino confiable para llegar a un post propio: el feed de Inicio es
+   * algorítmico y un post recién publicado deja de aparecer ahí apenas el feed
+   * se refresca (comprobado el 2026-09-15 barriendo 20 pantallas desde el tope
+   * sin encontrar ninguno de los 3 posts de la corrida).
+   */
+  async abrirPostDeActividad(prefijo: string): Promise<void> {
+    const entrada = this.entradaActividad(prefijo)
+    for (let i = 0; i < 8; i++) {
+      if (await this.isVisible(entrada)) break
+      await this.scrollDown()
+    }
+    await this.waitForElement(entrada, 15000)
+    await this.tap(entrada)
+  }
+
   async abrirVerMasActividad(): Promise<void> {
     // "Ver más actividad" está debajo del fold inicial del perfil (requiere
-    // scroll para que UiAutomator2 lo considere "displayed").
-    const visible = await this.isVisible(this.btnVerMasActividad)
-    if (!visible) {
+    // scroll para que UiAutomator2 lo considere "displayed"). Cuántos scrolls
+    // hacen falta depende de cuánta actividad tenga la cuenta, así que se
+    // itera en vez de asumir uno solo.
+    for (
+      let i = 0;
+      i < 5 && !(await this.isVisible(this.btnVerMasActividad));
+      i++
+    ) {
       await this.scrollDown()
     }
     await this.waitForElement(this.btnVerMasActividad, 15000)
-    await this.tap(this.btnVerMasActividad)
+    await this.tapCuandoQuieto(this.btnVerMasActividad)
+    // El page object confirma que se llegó: si no, el test falla en su primer
+    // filtro y parece un problema de los chips cuando en realidad no navegó.
+    await this.waitForElement(this.filtroActividad('Todas'), 15000)
   }
 
   async aplicarFiltroActividad(label: string): Promise<void> {
@@ -400,16 +437,42 @@ class ProfilePage extends BasePage {
   async abrirAgregarSeccion(): Promise<void> {
     // "Comenzar" está bastante más abajo que "Ver más actividad" — puede
     // necesitar varios scrolls, no alcanza con uno solo.
+    // Se scrollea hasta el TÍTULO de la tarjeta, no hasta el botón: pasarse de
+    // largo hace que la tarjeta se virtualice y el locator del botón resuelva al
+    // otro "Comenzar" de la pantalla, el que abre "Crear publicación".
     for (
       let i = 0;
-      i < 5 && !(await this.isVisible(this.btnComenzarSeccionProfesional));
+      i < 8 && !(await this.isVisible(this.tituloInfoProfesional));
       i++
     ) {
       await this.scrollDown()
     }
+    await this.waitForElement(this.tituloInfoProfesional, 15000)
     await this.waitForElement(this.btnComenzarSeccionProfesional, 15000)
-    await this.tap(this.btnComenzarSeccionProfesional)
-    await this.waitForElement(this.headingAgregarSeccion, 10000)
+
+    // Con el título recién visible, "Comenzar" queda al fondo, CORTADO por el
+    // bottom nav fijo. UiAutomator2 lo da por "displayed" porque asoma, pero su
+    // centro —que es donde cae el tap— está tapado por la barra: el tap se lo
+    // come el nav y no pasa nada. El test fallaba después, al esperar el modal,
+    // pareciendo un problema del modal (2026-09-16).
+    //
+    // Se lo termina de subir con scrolls finos hasta que entre entero por
+    // encima de la barra.
+    const { height: altoPantalla } = await driver.getWindowSize()
+    const topeDelNav = altoPantalla - ALTO_BOTTOM_NAV
+    for (let i = 0; i < 6; i++) {
+      const pos = await this.btnComenzarSeccionProfesional
+        .getLocation()
+        .catch(() => null)
+      const tam = await this.btnComenzarSeccionProfesional
+        .getSize()
+        .catch(() => null)
+      if (!pos || !tam || pos.y + tam.height <= topeDelNav) break
+      await this.scrollDownSmall()
+    }
+
+    await this.tapCuandoQuieto(this.btnComenzarSeccionProfesional)
+    await this.waitForElement(this.headingAgregarSeccion, 15000)
   }
 
   async abrirAgregarEducacion(): Promise<void> {
@@ -426,6 +489,11 @@ class ProfilePage extends BasePage {
     dropdown: ReturnType<typeof $>,
     valor: string,
   ): Promise<void> {
+    // Provincia/Ciudad dependen del valor elegido antes (país/provincia) —
+    // recién se habilitan/renderizan después de esa selección (posiblemente
+    // tras una llamada de red para poblar la lista), no alcanza con tocar
+    // directo. 10s no siempre es suficiente margen (visto 2026-09-08).
+    await this.waitForElement(dropdown, 15000)
     await this.tap(dropdown)
     const opcion = this.opcionListaPicker(valor)
     await this.waitForElement(opcion, 10000)

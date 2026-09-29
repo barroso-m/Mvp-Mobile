@@ -1,4 +1,4 @@
-import { BasePage } from '../BasePage'
+import { BasePage, type WdioElement } from '../BasePage'
 import { FeedLocators } from '../../locators/feed.locators'
 
 class FeedPage extends BasePage {
@@ -34,9 +34,6 @@ class FeedPage extends BasePage {
   }
   get btnEnviarComentario() {
     return $(FeedLocators.btnEnviarComentario)
-  }
-  get btnVerMas() {
-    return $(FeedLocators.btnVerMas)
   }
   get repostEditor() {
     return $(FeedLocators.repostEditor)
@@ -82,6 +79,26 @@ class FeedPage extends BasePage {
     return $(FeedLocators.btnGuardarRepostByText(texto))
   }
 
+  get btnEliminarPost() {
+    return $(FeedLocators.btnEliminarPost)
+  }
+
+  get btnConfirmarEliminarPost() {
+    return $(FeedLocators.btnConfirmarEliminarPost)
+  }
+
+  postEnFeedPorPrefijo(prefijo: string) {
+    return $(FeedLocators.postPorPrefijo(prefijo))
+  }
+
+  btnVerMasDePost(texto: string) {
+    return $(FeedLocators.btnVerMasDePostByText(texto))
+  }
+
+  btnMenuDePost(texto: string) {
+    return $(FeedLocators.btnMenuPostByText(texto))
+  }
+
   chipFiltro(label: string) {
     return $(FeedLocators.chipFiltro(label))
   }
@@ -94,22 +111,56 @@ class FeedPage extends BasePage {
     await this.tap(this.btnCrear)
   }
 
+  /**
+   * Espera a que el composer vuelva con la imagen ya adjuntada, usando
+   * "Cambiar imagen" como señal. Absorbe los tres tropiezos del flujo del
+   * picker, que no ocurren siempre ni en el mismo orden:
+   *
+   * 1. Entre elegir la foto y volver al composer puede meterse la pantalla de
+   *    recorte ("CORTAR"). Tarda distinto según la carga del emulador: con una
+   *    espera fija de 4s a veces se la perdía y el resto del flujo terminaba
+   *    scrolleando DENTRO del recorte hasta timeoutear.
+   * 2. En el APK 2026-09-06 "Cambiar imagen" nace DEBAJO del pliegue (la
+   *    sección pasó a ser "Imagen o video", con línea extra de ayuda y preview
+   *    de lo seleccionado). Esperarlo sin scrollear timeoutea con el elemento
+   *    ya en el árbol pero no `displayed`.
+   * 3. La franja que usa `scrollDown()` (top 800, alto 600) cae justo sobre el
+   *    editor de Descripción, le da foco y abre el teclado, que vuelve a tapar
+   *    la sección de imagen. Por eso baja el teclado en cada vuelta.
+   */
+  private async volverAlComposerConImagen(): Promise<void> {
+    await browser.waitUntil(
+      async () => {
+        if (await this.isVisible(this.btnCortarImagen)) {
+          await this.tap(this.btnCortarImagen)
+          return false
+        }
+        await driver.hideKeyboard().catch(() => {})
+        if (await this.isVisible(this.btnCambiarImagen)) return true
+        await this.scrollDown()
+        return false
+      },
+      {
+        timeout: 40000,
+        interval: 500,
+        timeoutMsg:
+          'El composer nunca volvió con la imagen adjuntada ("Cambiar imagen" no quedó visible)',
+      },
+    )
+  }
+
   async crearPost(texto: string): Promise<void> {
     await this.waitForElement(this.btnSeleccionarImagen, 15000)
     await this.tap(this.btnSeleccionarImagen)
     await this.waitForElement(this.imgGaleriaItem, 10000)
     await this.tap(this.imgGaleriaItem)
-    // El picker de imágenes puede pedir confirmar el recorte antes de volver al form.
-    const apareceCortar = await this.btnCortarImagen
-      .waitForDisplayed({ timeout: 4000 })
-      .catch(() => false)
-    if (apareceCortar) {
-      await this.tap(this.btnCortarImagen)
-    }
-    await this.waitForElement(this.btnCambiarImagen, 10000)
-    await this.scrollDown()
+    await this.volverAlComposerConImagen()
     await this.waitForElement(this.inputTexto, 10000)
     await this.setValue(this.inputTexto, texto)
+    // Escribir deja el teclado abierto sobre el footer fijo: el tap en
+    // "Siguiente" se lo come el teclado y el form no avanza de paso (se veía
+    // como "~Publicar no aparece", con el composer todavía en el paso 1).
+    await driver.hideKeyboard().catch(() => {})
     await this.tap(this.btnSiguiente)
     await this.waitForElement(this.btnPublicar, 10000)
     await this.tap(this.btnPublicar)
@@ -120,7 +171,30 @@ class FeedPage extends BasePage {
   }
 
   async esperarPostVisible(texto: string, timeout = 30000): Promise<void> {
-    const post = this.postEnFeed(texto)
+    await this.scrollHastaPostVisible(this.postEnFeed(texto), texto, timeout)
+  }
+
+  /**
+   * Igual que `esperarPostVisible` pero anclando por prefijo. Un post largo
+   * llega truncado al feed, así que su TextView nunca va a matchear por
+   * igualdad con el texto que se publicó.
+   */
+  async esperarPostVisiblePorPrefijo(
+    prefijo: string,
+    timeout = 30000,
+  ): Promise<void> {
+    await this.scrollHastaPostVisible(
+      this.postEnFeedPorPrefijo(prefijo),
+      prefijo,
+      timeout,
+    )
+  }
+
+  private async scrollHastaPostVisible(
+    post: WdioElement,
+    descripcion: string,
+    timeout: number,
+  ): Promise<void> {
     // No alcanza con que el texto tenga algún píxel visible: la fila de acciones
     // (like/comentar/repostear/compartir) queda ~300px debajo del texto dentro de
     // la card, así que se exige un margen para que quede realmente interactuable.
@@ -145,7 +219,7 @@ class FeedPage extends BasePage {
       await this.scrollDown()
     }
     throw new Error(
-      `El post "${texto}" no apareció en el feed después de ${timeout}ms`,
+      `El post "${descripcion}" no apareció en el feed después de ${timeout}ms`,
     )
   }
 
@@ -160,19 +234,46 @@ class FeedPage extends BasePage {
     await this.waitForElement(btn, 15000)
     await this.tap(btn)
     await this.waitForElement(this.inputComentario, 10000)
+    // `setValue` hace `clearValue` primero, y eso deja el campo con
+    // focused="false": el botón de enviar del modal solo se renderiza con el
+    // input enfocado, así que hay que volver a tocarlo después de escribir.
+    await this.tap(this.inputComentario)
     await this.setValue(this.inputComentario, comentario)
+    await this.tap(this.inputComentario)
     await this.tap(this.btnEnviarComentario)
   }
 
-  async expandirVerMas(): Promise<void> {
-    await this.waitForElement(this.btnVerMas, 15000)
-    await this.tap(this.btnVerMas)
+  async expandirVerMasDePost(textoPost: string): Promise<void> {
+    const btn = this.btnVerMasDePost(textoPost)
+    await this.waitForElement(btn, 15000)
+    await this.tap(btn)
   }
 
   async compartirPost(textoPost: string): Promise<void> {
     const btn = this.btnCompartirDePost(textoPost)
     await this.waitForElement(btn, 15000)
     await this.tap(btn)
+  }
+
+  /**
+   * Borra un post propio. La app no expone el borrado en ningún gesto obvio: no
+   * hay menú en la fila de acciones, el post no abre detalle al tocarlo y el
+   * long-press no hace nada. Está detrás del "..." del header, que no tiene ni
+   * texto ni content-desc (ver `btnMenuPostByText`), y abre un bottom sheet
+   * "Editar / Eliminar" + un AlertDialog de confirmación.
+   *
+   * Requiere que la card del post YA esté en pantalla — sirve igual en el feed
+   * que en el detalle del post, porque la card es la misma. Ancla por prefijo
+   * para poder borrar también los posts largos, que llegan truncados.
+   */
+  async eliminarPostVisible(prefijoPost: string): Promise<void> {
+    const menu = this.btnMenuDePost(prefijoPost)
+    await this.waitForElement(menu, 15000)
+    await this.tap(menu)
+    await this.waitForElement(this.btnEliminarPost, 10000)
+    await this.tap(this.btnEliminarPost)
+    await this.waitForElement(this.btnConfirmarEliminarPost, 10000)
+    await this.tap(this.btnConfirmarEliminarPost)
   }
 
   async abrirRepostModal(textoPost: string): Promise<void> {

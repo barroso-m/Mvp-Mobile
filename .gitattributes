@@ -1,0 +1,14 @@
+# Normalizacion de finales de linea.
+# Los atributos ganan sobre core.autocrlf, asi que esto aplica igual para
+# todo el equipo sin depender de la config local de cada maquina.
+# eol=lf evita que Prettier (default endOfLine: "lf") pelee con el checkout
+# de Windows, que escribia CRLF.
+* text=auto eol=lf
+
+# Binarios: que git no los toque nunca.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.mp4 binary
+*.apk binary
+*.ipa binary

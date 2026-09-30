@@ -8,7 +8,7 @@ const TERMINO_CON_RESULTADOS = 'Tin'
 const TERMINO_SIN_RESULTADOS = 'zzzzz999'
 
 describe('[#chat] Mensajes', () => {
-  it('TC14 [CHT-M-001] - la pantalla de Mensajes se visualiza con todos sus elementos', async () => {
+  it('TC14 [IE-T121] - la pantalla de Mensajes se visualiza con todos sus elementos', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -31,7 +31,7 @@ describe('[#chat] Mensajes', () => {
     )
   })
 
-  it('TC15 [CHT-M-008] - el buscador filtra conversaciones y muestra empty state sin coincidencias', async () => {
+  it('TC15 [IE-T128] - el buscador filtra conversaciones y muestra empty state sin coincidencias', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -49,7 +49,7 @@ describe('[#chat] Mensajes', () => {
     })
   })
 
-  it('TC39 [IE-T70] - enviar un mensaje en una conversación existente', async () => {
+  it('TC39 [IE-T122] - enviar un mensaje en una conversación existente', async () => {
     const mensaje = `Mensaje QA ${Date.now()}`
 
     await step('Asegurar que el user está logueado', () =>
@@ -92,7 +92,7 @@ describe('[#chat] Mensajes', () => {
     )
   })
 
-  it('TC40 [IE-T71] - el panel "Nuevo mensaje" busca usuarios y resuelve con y sin resultados', async () => {
+  it('TC40 [IE-T123] - el panel "Nuevo mensaje" busca usuarios y resuelve con y sin resultados', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -125,7 +125,7 @@ describe('[#chat] Mensajes', () => {
     })
   })
 
-  it('TC41 [IE-T72] - el tab "No leídas" filtra solo conversaciones sin leer', async () => {
+  it('TC41 [IE-T124] - el tab "No leídas" filtra solo conversaciones sin leer', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -162,7 +162,7 @@ describe('[#chat] Mensajes', () => {
     })
   })
 
-  it('TC42 [IE-T75] - el tab "Solicitudes" muestra su contador y el estado correspondiente', async () => {
+  it('TC42 [IE-T127] - el tab "Solicitudes" muestra su contador y el estado correspondiente', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -187,7 +187,7 @@ describe('[#chat] Mensajes', () => {
     })
   })
 
-  it('TC43 [IE-T74] - la pill de no leídos del tab Mensajes refleja el estado de la bandeja', async () => {
+  it('TC43 [IE-T126] - la pill de no leídos del tab Mensajes refleja el estado de la bandeja', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

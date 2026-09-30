@@ -99,7 +99,7 @@ describe('[#feed] Feed', () => {
     })
   })
 
-  it('TC08 [FEED-M-003] - comentar el post recién creado y validar publicación', async () => {
+  it('TC08 [IE-T111] - comentar el post recién creado y validar publicación', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -115,7 +115,7 @@ describe('[#feed] Feed', () => {
     })
   })
 
-  it('TC09 [FEED-M-011] - expandir una publicación larga con "Ver más"', async () => {
+  it('TC09 [IE-T119] - expandir una publicación larga con "Ver más"', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -142,7 +142,7 @@ describe('[#feed] Feed', () => {
     )
   })
 
-  it('TC10 [FEED-M-012] - compartir una publicación abre el share sheet nativo', async () => {
+  it('TC10 [IE-T120] - compartir una publicación abre el share sheet nativo', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -163,7 +163,7 @@ describe('[#feed] Feed', () => {
     await step('Cerrar el share sheet con back', () => driver.back())
   })
 
-  it('TC18 [IE-T48] - abrir modal Repostear y validar botón deshabilitado', async () => {
+  it('TC18 [IE-T149] - abrir modal Repostear y validar botón deshabilitado', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -183,7 +183,7 @@ describe('[#feed] Feed', () => {
     await step('Cerrar el modal sin publicar', () => driver.back())
   })
 
-  it('TC19 [IE-T58] - validar mínimo 50 caracteres en el modal Repostear', async () => {
+  it('TC19 [IE-T110] - validar mínimo 50 caracteres en el modal Repostear', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -209,7 +209,7 @@ describe('[#feed] Feed', () => {
     await step('Cerrar el modal sin publicar', () => driver.back())
   })
 
-  it('TC20 [IE-T49] - repostear una publicación y guardar/desguardar el repost', async () => {
+  it('TC20 [IE-T109] - repostear una publicación y guardar/desguardar el repost', async () => {
     const post = `fixture repost mobile ${Date.now()}`
     const REPOST_TEXT = `repost automation mobile ${Date.now()} test automatico`
 
@@ -236,7 +236,7 @@ describe('[#feed] Feed', () => {
     )
   })
 
-  it('TC21 [IE-T52] - aplicar y limpiar el filtro "Personas" del feed', async () => {
+  it('TC21 [IE-T114] - aplicar y limpiar el filtro "Personas" del feed', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -252,7 +252,7 @@ describe('[#feed] Feed', () => {
     })
   })
 
-  it('TC22 [IE-T54] - el filtro "Encuestas" navega correctamente', async () => {
+  it('TC22 [IE-T150] - el filtro "Encuestas" navega correctamente', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

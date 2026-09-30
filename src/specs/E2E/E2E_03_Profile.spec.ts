@@ -22,7 +22,7 @@ describe('[#profile] Profile', () => {
     )
   })
 
-  it('TC11 [PRF-M-002] - editar la sección "Sobre mi" y validar que el texto persiste', async () => {
+  it('TC11 [IE-T90] - editar la sección "Sobre mi" y validar que el texto persiste', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -41,7 +41,7 @@ describe('[#profile] Profile', () => {
     )
   })
 
-  it('TC12 [PRF-M-005] - Configuración de usuario muestra los items correctos y su estado', async () => {
+  it('TC12 [IE-T93] - Configuración de usuario muestra los items correctos y su estado', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -63,7 +63,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC13 [PRF-M-010] - acceder a "Guardados" desde el menú lateral', async () => {
+  it('TC13 [IE-T98] - acceder a "Guardados" desde el menú lateral', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -75,7 +75,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC23 [IE-T45] - cancelar edición de "Sobre mí" no persiste el cambio', async () => {
+  it('TC23 [IE-T96] - cancelar edición de "Sobre mí" no persiste el cambio', async () => {
     const textoQueNoDebePersistir = `Texto que NO debe persistir ${Date.now()}`
 
     await step('Asegurar que el user está logueado', () =>
@@ -95,7 +95,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC24 [IE-T20] - navegar al perfil del usuario desde el feed', async () => {
+  it('TC24 [IE-T151] - navegar al perfil del usuario desde el feed', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -110,7 +110,7 @@ describe('[#profile] Profile', () => {
     )
   })
 
-  it('TC25 [IE-T39] - abrir modal "Agregar sección"', async () => {
+  it('TC25 [IE-T91] - abrir modal "Agregar sección"', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -125,7 +125,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC26 [IE-T40] - ver más actividad y filtrar', async () => {
+  it('TC26 [IE-T92] - ver más actividad y filtrar', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -147,7 +147,7 @@ describe('[#profile] Profile', () => {
     }
   })
 
-  it('TC27 [IE-T41] - editar datos personales desde configuración', async function () {
+  it('TC27 [IE-T152] - editar datos personales desde configuración', async function () {
     this.timeout(240000)
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
@@ -194,7 +194,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC28 [IE-T42] - toggle switch de Newsletter y persistir', async () => {
+  it('TC28 [IE-T153] - toggle switch de Newsletter y persistir', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -224,7 +224,7 @@ describe('[#profile] Profile', () => {
     )
   })
 
-  it('TC29 [IE-T43] - toggle switch de Notificaciones y persistir', async () => {
+  it('TC29 [IE-T94] - toggle switch de Notificaciones y persistir', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -249,7 +249,7 @@ describe('[#profile] Profile', () => {
     await step('Restaurar el estado original', () => switchPush.click())
   })
 
-  it('TC30 [IE-T46] - abrir Datos profesionales con "Guardar cambios" deshabilitado', async () => {
+  it('TC30 [IE-T154] - abrir Datos profesionales con "Guardar cambios" deshabilitado', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -261,7 +261,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC31 [IE-T22] - validar error al ingresar letras en el campo teléfono', async () => {
+  it('TC31 [IE-T155] - validar error al ingresar letras en el campo teléfono', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -276,7 +276,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC33 [IE-T24] - agregar educación en el perfil', async () => {
+  it('TC33 [IE-T89] - agregar educación en el perfil', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -314,7 +314,7 @@ describe('[#profile] Profile', () => {
     )
   })
 
-  it('TC34 [IE-T44] - validaciones del formulario "Agregar educación"', async () => {
+  it('TC34 [IE-T95] - validaciones del formulario "Agregar educación"', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -349,7 +349,7 @@ describe('[#profile] Profile', () => {
     })
   })
 
-  it('TC35 [IE-T25] - eliminar educación en el perfil', async () => {
+  it('TC35 [IE-T156] - eliminar educación en el perfil', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

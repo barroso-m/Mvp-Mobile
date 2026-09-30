@@ -55,7 +55,7 @@ async function completarHastaElUltimoPaso(): Promise<void> {
 }
 
 describe('[#onboarding] Registro de usuario (Onboarding)', () => {
-  it('TC44 [IE-T31] - alta completa: el wizard termina en el feed autenticado', async function () {
+  it('TC44 [IE-T78] - alta completa: el wizard termina en el feed autenticado', async function () {
     this.timeout(TIMEOUT_ALTA_COMPLETA)
     const datos = buildDatosPersonales()
     console.log(`>>> cuenta creada por TC44: ${datos.email}`)
@@ -74,7 +74,7 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     )
   })
 
-  it('TC45 [IE-T32] - alta completa salteando el último paso ("Saltear")', async function () {
+  it('TC45 [IE-T84] - alta completa salteando el último paso ("Saltear")', async function () {
     this.timeout(TIMEOUT_ALTA_COMPLETA)
     const datos = buildDatosPersonales()
     console.log(`>>> cuenta creada por TC45: ${datos.email}`)
@@ -92,7 +92,7 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     )
   })
 
-  it('TC46 [IE-T33] - registro fallido con un email ya registrado', async () => {
+  it('TC46 [IE-T81] - registro fallido con un email ya registrado', async () => {
     await step('Ir a la pantalla inicial', () => asegurarPantallaInicial())
     await step('Abrir el wizard de registro', () =>
       OnboardingPage.abrirRegistro(),
@@ -113,7 +113,7 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     )
   })
 
-  it('TC47 [IE-T34] - el email con formato inválido no habilita "Siguiente"', async () => {
+  it('TC47 [IE-T80] - el email con formato inválido no habilita "Siguiente"', async () => {
     await step('Ir a la pantalla inicial', () => asegurarPantallaInicial())
     await step('Abrir el wizard de registro', () =>
       OnboardingPage.abrirRegistro(),
@@ -133,7 +133,7 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     )
   })
 
-  it('TC48 [IE-T35] - un código de verificación incorrecto no avanza el wizard', async function () {
+  it('TC48 [IE-T83] - un código de verificación incorrecto no avanza el wizard', async function () {
     this.timeout(TIMEOUT_ALTA_COMPLETA)
     const datos = buildDatosPersonales()
     console.log(`>>> cuenta creada por TC48: ${datos.email}`)
@@ -154,7 +154,7 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     })
   })
 
-  it('TC49 [IE-T36] - campos obligatorios de los pasos 1 y 2 habilitan "Siguiente"', async function () {
+  it('TC49 [IE-T79] - campos obligatorios de los pasos 1 y 2 habilitan "Siguiente"', async function () {
     this.timeout(300000)
     const datos = buildDatosPersonales()
 

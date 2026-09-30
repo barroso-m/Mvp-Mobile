@@ -30,7 +30,7 @@ describe('[#login] Login', () => {
     })
   })
 
-  it('TC06 [ONB-M-010] - cerrar sesión desde el menú lateral vuelve a la pantalla inicial', async () => {
+  it('TC06 [IE-T87] - cerrar sesión desde el menú lateral vuelve a la pantalla inicial', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -44,7 +44,7 @@ describe('[#login] Login', () => {
     })
   })
 
-  it('TC07 [ONB-M-011] - la sesión persiste al cerrar y reabrir la app', async () => {
+  it('TC07 [IE-T88] - la sesión persiste al cerrar y reabrir la app', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

@@ -3,7 +3,7 @@ import { asegurarSesionEnFeed } from '../../utils/session.helper'
 import { step } from '../../utils/logger'
 
 describe('[#campus] Oferta académica (Campus)', () => {
-  it('TC16 [OFA-M-001] - el tab Campus muestra la Oferta académica con todas sus secciones', async () => {
+  it('TC16 [IE-T101] - el tab Campus muestra la Oferta académica con todas sus secciones', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -28,7 +28,7 @@ describe('[#campus] Oferta académica (Campus)', () => {
     })
   })
 
-  it('TC17 [OFA-M-004] - abrir el detalle de una formación desde Recomendados y volver al tab', async () => {
+  it('TC17 [IE-T104] - abrir el detalle de una formación desde Recomendados y volver al tab', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -51,7 +51,7 @@ describe('[#campus] Oferta académica (Campus)', () => {
     })
   })
 
-  it('TC36 [IE-T62] - el carrusel de Recomendados avanza con swipe horizontal', async () => {
+  it('TC36 [IE-T102] - el carrusel de Recomendados avanza con swipe horizontal', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -81,7 +81,7 @@ describe('[#campus] Oferta académica (Campus)', () => {
     })
   })
 
-  it('TC37 [IE-T63] - Mis inscripciones muestra badge INSCRIPTO y botón "Ver más"', async () => {
+  it('TC37 [IE-T103] - Mis inscripciones muestra badge INSCRIPTO y botón "Ver más"', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
@@ -102,7 +102,7 @@ describe('[#campus] Oferta académica (Campus)', () => {
     )
   })
 
-  it('TC38 [IE-T66] - "Explorar catálogo" abre el catálogo con listado de cursos', async () => {
+  it('TC38 [IE-T106] - "Explorar catálogo" abre el catálogo con listado de cursos', async () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )

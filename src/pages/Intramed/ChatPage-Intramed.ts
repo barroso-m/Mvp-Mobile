@@ -95,11 +95,6 @@ class ChatPage extends BasePage {
     await this.inputBuscador.clearValue()
   }
 
-  /** Los tabs (Todas / No leídas / Solicitudes) NO reflejan su estado en el
-   * árbol de accesibilidad — `selected` queda en `false` en los tres aunque
-   * uno se vea resaltado. La única señal confiable de qué tab está activo es
-   * el contenido de la lista, así que estos helpers solo tocan y esperan a que
-   * la pantalla se estabilice. */
   async irATabNoLeidas(): Promise<void> {
     await this.waitForElement(this.tabNoLeidas)
     await this.tap(this.tabNoLeidas)
@@ -118,9 +113,6 @@ class ChatPage extends BasePage {
     await this.esperarListaEstable()
   }
 
-  /** Espera a que el tab resuelva a uno de sus dos desenlaces posibles: lista
-   * con conversaciones o empty state. Sin esto, un `expect` inmediato después
-   * de tocar el tab lee todavía el contenido del tab anterior. */
   private async esperarListaEstable(): Promise<void> {
     await browser.waitUntil(
       async () =>
@@ -134,8 +126,6 @@ class ChatPage extends BasePage {
     )
   }
 
-  /** Cantidad de no leídos que el tab de la navbar prefija en su content-desc
-   * ("32, Mensajes"). Devuelve 0 cuando no hay badge. */
   async contadorNoLeidosNavbar(): Promise<number> {
     if (!(await this.isVisible(this.tabMensajesConBadge))) return 0
     const desc =
@@ -143,7 +133,6 @@ class ChatPage extends BasePage {
     return parseInt(desc.split(',')[0].trim(), 10) || 0
   }
 
-  /** Número entre paréntesis de la label del tab "Solicitudes (N)". */
   async contadorSolicitudes(): Promise<number> {
     await this.waitForElement(this.tabSolicitudes)
     const desc = (await this.tabSolicitudes.getAttribute('content-desc')) ?? ''
@@ -152,9 +141,6 @@ class ChatPage extends BasePage {
     return parseInt(m[1], 10)
   }
 
-  /** Nombres de las conversaciones visibles en la lista, leídos del
-   * `content-desc` del contenedor de cada fila (formato
-   * `"<nombre>, <fecha>, [Tú: , ]<último mensaje>[, <no leídos>]"`). */
   async conversacionesVisibles(): Promise<string[]> {
     const filas = await $$(
       '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]',
@@ -177,9 +163,6 @@ class ChatPage extends BasePage {
     await this.waitForElement(this.headerNombreUsuario(nombre), 15000)
   }
 
-  /** Escribe y envía. El `send-button` arranca deshabilitado y solo se habilita
-   * con texto cargado — se espera ese cambio antes de tocarlo en vez de tocar
-   * a ciegas. */
   async enviarMensaje(texto: string): Promise<void> {
     await this.waitForElement(this.inputMensaje, 15000)
     await this.setValue(this.inputMensaje, texto)
@@ -196,10 +179,6 @@ class ChatPage extends BasePage {
     await this.waitForElement(this.tituloMensajes, 15000)
   }
 
-  /** La fila de la lista NO refleja el mensaje recién enviado de inmediato: al
-   * volver de la conversación queda unos segundos con el `content-desc` viejo
-   * hasta que llega el refresh del backend. Leerlo de una sola vez hace flakear
-   * el test (pasó en la 2ª corrida de validación), así que se poletea. */
   async esperarUltimoMensajeEnLista(
     nombre: string,
     texto: string,

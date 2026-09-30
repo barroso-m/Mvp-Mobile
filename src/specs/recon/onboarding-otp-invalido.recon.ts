@@ -1,8 +1,3 @@
-/**
- * Relevamiento del código de verificación incorrecto (`IE-T35`). NO es un test.
- *
- *   npx wdio run config/wdio.android.conf.ts --spec ./src/specs/recon/onboarding-otp-invalido.recon.ts --mochaOpts.retries 0 --mochaOpts.timeout 900000
- */
 import OnboardingPage from '../../pages/Intramed/OnboardingPage-Intramed'
 import {
   buildDatosPersonales,
@@ -24,8 +19,6 @@ describe('[recon] Onboarding — código de verificación incorrecto', () => {
 
     await dump('onb-otp-01-pantalla')
 
-    // Código inválido: se cargan los 6 dígitos a mano porque completarOtp()
-    // espera el avance al paso de contacto, que acá no va a pasar.
     const inputs = await OnboardingPage.inputsDelCodigo()
     for (let i = 0; i < 6; i++) {
       await inputs[i].setValue('0').catch(() => {})
@@ -37,7 +30,6 @@ describe('[recon] Onboarding — código de verificación incorrecto', () => {
       await dump(`onb-otp-02-invalido-${ms}`)
     }
 
-    // Recuperación: el código real después del fallido.
     const codigo = await getOtpCode(datos.email, { sentAfter: desdeCuando })
     console.log(`>>> OTP real: ${codigo}`)
     const inputs2 = await OnboardingPage.inputsDelCodigo()

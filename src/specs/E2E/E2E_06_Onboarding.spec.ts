@@ -13,11 +13,8 @@ import { step } from '../../utils/logger'
 const EMAIL_REGISTRADO = process.env.ONBOARDING_EMAIL_REGISTRADO!
 const EMAILS_INVALIDOS = ['test@', 'test.com', '@dominio.com']
 const COMO_CONOCIO = 'Artículo o contenido científico'
-// El wizard completo son 6 pasos con selectores que scrollean dentro de un
-// bottom sheet: no entra ni cerca en los 120s por defecto de la suite.
 const TIMEOUT_ALTA_COMPLETA = 600000
 
-/** Deja al usuario en el paso de verificación, con el OTP ya leído de Gmail. */
 async function registrarHastaElOtp(
   datos: ReturnType<typeof buildDatosPersonales>,
 ): Promise<string> {
@@ -44,7 +41,6 @@ async function registrarHastaElOtp(
   )
 }
 
-/** Completa contacto y formación profesional, hasta "¿Cómo conoció Intramed?". */
 async function completarHastaElUltimoPaso(): Promise<void> {
   await step('Completar la información de contacto', () =>
     OnboardingPage.completarContacto(CONTACTO),
@@ -69,9 +65,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
       OnboardingPage.completarOtp(codigo),
     )
     await completarHastaElUltimoPaso()
-    // Mobile no tiene la pantalla de "Completar mi perfil" / "Omitir" de web:
-    // el alta termina entrando directo a la app. La rama "completa" es
-    // responder "¿Cómo conoció Intramed?" y tocar "Continuar".
     await step('Responder "¿Cómo conoció Intramed?"', () =>
       OnboardingPage.elegirComoConocio(COMO_CONOCIO),
     )
@@ -91,7 +84,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
       OnboardingPage.completarOtp(codigo),
     )
     await completarHastaElUltimoPaso()
-    // "Saltear" es el equivalente mobile del "Omitir" de web.
     await step('Saltear "¿Cómo conoció Intramed?"', () =>
       OnboardingPage.tocarSaltear(),
     )
@@ -126,8 +118,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     await step('Abrir el wizard de registro', () =>
       OnboardingPage.abrirRegistro(),
     )
-    // A diferencia de web, la app no expone un mensaje de error por formato:
-    // la única señal observable es que "Siguiente" no se habilita.
     for (const invalido of EMAILS_INVALIDOS) {
       await step(`Cargar el email inválido "${invalido}"`, async () => {
         await OnboardingPage.completarEmail(invalido)
@@ -152,8 +142,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
     await step('Cargar un código incorrecto', () =>
       OnboardingPage.cargarCodigoSinEsperar('000000'),
     )
-    // Mobile no muestra el "¡Código incorrecto!" que sí muestra web: limpia los
-    // inputs y se queda en la pantalla. La señal observable es que NO avanza.
     await step('Validar que sigue en el paso de verificación', async () => {
       await expect(OnboardingPage.msgCodigoEnviado).toBeDisplayed()
       await expect(OnboardingPage.tituloContacto).not.toBeDisplayed()
@@ -167,9 +155,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
   })
 
   it('TC49 [IE-T36] - campos obligatorios de los pasos 1 y 2 habilitan "Siguiente"', async function () {
-    // Recorre dos pasos completos del wizard consultando el estado de
-    // "Siguiente" cuatro veces, y cada consulta implica scrollear hasta el pie
-    // del formulario: no entra en los 120s por defecto de la suite.
     this.timeout(300000)
     const datos = buildDatosPersonales()
 
@@ -181,9 +166,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
       'Completar el paso 1 salvo los términos y validar "Siguiente" deshabilitado',
       async () => {
         await OnboardingPage.completarDatosPersonales({ ...datos }, false)
-        // El wizard retiene el estado entre entradas: si una corrida anterior
-        // dejó los términos tildados, "Siguiente" arranca habilitado y el caso
-        // valida lo contrario de lo que dice.
         await OnboardingPage.asegurarTerminosDestildados()
         expect(await OnboardingPage.siguienteHabilitado()).toBe(false)
       },
@@ -220,11 +202,6 @@ describe('[#onboarding] Registro de usuario (Onboarding)', () => {
   })
 
   after(async () => {
-    // Ningún caso de acá completa el alta, pero todos dejan la app DENTRO del
-    // wizard, que no es ni el feed ni el login: `asegurarSesionEnFeed` no sabe
-    // salir de ahí (el paso 1 no tiene "Go back"). Hay que salir explícitamente.
-    // Los casos de alta completa terminan LOGUEADOS con la cuenta nueva, no
-    // dentro del wizard: `asegurarPantallaInicial` cubre los dos casos.
     await asegurarPantallaInicial().catch(() => {})
     await LoginPage.waitForScreenReady().catch(() => {})
   })

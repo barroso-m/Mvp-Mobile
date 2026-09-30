@@ -18,6 +18,5 @@ export const CampusLocators = {
     `//android.view.ViewGroup[contains(@content-desc, "${titulo}")]`,
   btnVerMasPorTitulo: (titulo: string) =>
     `//android.view.ViewGroup[contains(@content-desc, "${titulo}")]//*[@content-desc="Ver más"]`,
-  // Card del catálogo: cada item tiene content-desc con formato "<autor>. <título>."
   cardCatalogo: '//android.view.ViewGroup[contains(@content-desc, ". ")]',
 } as const

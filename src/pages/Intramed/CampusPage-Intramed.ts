@@ -59,16 +59,9 @@ class CampusPage extends BasePage {
   async abrirTab(): Promise<void> {
     await this.waitForElement(this.tabCampus, 15000)
     await this.tap(this.tabCampus)
-    // Recién instalada la app, la Oferta tarda bastante en traer sus datos.
-    // No es holgura de más: en la corrida del 2026-09-28 el único abrirTab()
-    // que pasó tardó 36,4s y los otros cuatro murieron justo en los 40s que
-    // había acá. Con 3,6s de margen, Campus entero era una moneda al aire.
     await this.waitForElement(this.tituloOfertaAcademica, 90000)
   }
 
-  /** Scrollea hacia arriba hasta que "Oferta académica" sea visible.
-   * Útil cuando, tras volver de una vista interior, el scroll queda en la
-   * misma posición que tenía antes de navegar y hay que resetear al tope. */
   async scrollToTop(maxScrolls = 10): Promise<void> {
     for (let i = 0; i < maxScrolls; i++) {
       if (await this.isVisible(this.tituloOfertaAcademica)) return
@@ -76,10 +69,6 @@ class CampusPage extends BasePage {
     }
   }
 
-  /** El primer "Ver más" del árbol pertenece a "Mis inscripciones", y en un
-   * curso ya inscripto ese botón abre el campus externo en Chrome en vez de
-   * navegar al detalle in-app. Hay que tomar uno que caiga debajo del heading
-   * de Recomendados. */
   async abrirPrimerRecomendado(): Promise<void> {
     await this.scrollHastaCarruselRecomendados()
     const yHeading = (await this.seccionRecomendados.getLocation()).y
@@ -98,9 +87,6 @@ class CampusPage extends BasePage {
     await this.waitForElement(this.tituloOfertaAcademica, 15000)
   }
 
-  /** Scrollea hasta que un elemento marcador (por text visible) esté a la vista.
-   * Útil para llegar a "Explorar catálogo" o similar sin saltear cuando el
-   * bottom tab bar tapa parcialmente los banners. */
   async scrollHastaTexto(texto: string, maxScrolls = 8): Promise<void> {
     for (let i = 0; i < maxScrolls; i++) {
       const el = $(`//*[@text="${texto}" or @content-desc="${texto}"]`)
@@ -112,9 +98,6 @@ class CampusPage extends BasePage {
     )
   }
 
-  /** Swipe horizontal (derecha → izquierda) para avanzar un carrusel.
-   * `centerY` debe caer dentro del carrusel objetivo (Recomendados vive a
-   * mitad de pantalla cuando el heading está visible). */
   async swipeCarruselHorizontal(centerY: number): Promise<void> {
     const { width } = await driver.getWindowSize()
     await driver.execute('mobile: swipeGesture', {
@@ -127,21 +110,11 @@ class CampusPage extends BasePage {
     })
   }
 
-  /** Deja el carrusel de Recomendados con sus cards visibles (no solo el
-   * heading, que queda tapado por el bottom tab bar cuando aparece recién por
-   * el fondo). Estrategia: scrollear hasta que "Más formaciones disponibles"
-   * asome — en ese momento Recomendados quedó en la parte superior/media de
-   * la pantalla, cards incluidas. */
   async scrollHastaCarruselRecomendados(): Promise<void> {
     await this.waitForElement(this.seccionRecomendados, 15000)
     await this.scrollHastaTexto('Más formaciones disponibles')
   }
 
-  /** Lee del page source los `text=` visibles entre el heading "Recomendados
-   * para vos" y el heading "Más formaciones disponibles". Devuelve solo los
-   * candidatos a título de card (descarta labels genéricos y el propio heading).
-   * Un solo request al server, evita disparar cientos de comandos que
-   * presionen la instrumentación UiAutomator2. */
   async titulosEnRecomendados(): Promise<string[]> {
     const src = await driver.getPageSource()
     const mReco = src.match(
@@ -159,12 +132,6 @@ class CampusPage extends BasePage {
       'Ver más',
     ])
     const re =
-      // `getPageSource()` NO devuelve `<node ...>`: cada elemento viene con su
-      // clase como nombre de tag (`<android.widget.TextView ...>`). Los dumps
-      // viejos de `recon/` sí tienen `<node>` porque salieron de
-      // `adb shell uiautomator dump`, que es otro formato — de ahí la confusión.
-      // Con `<node` el match era siempre vacío y TC36 fallaba en su primer
-      // assert ("títulos antes del swipe" = 0) sin llegar a swipear nunca.
       /<[\w.]+[^>]*?text="([^"]+)"[^>]*?bounds="\[\d+,(\d+)\]\[\d+,\d+\]"/g
     const out: string[] = []
     let m: RegExpExecArray | null
@@ -178,12 +145,10 @@ class CampusPage extends BasePage {
     return out
   }
 
-  /** Y central de la sección Recomendados para orientar el swipe. */
   async centroRecomendados(): Promise<number> {
     await this.waitForElement(this.seccionRecomendados)
     const loc = await this.seccionRecomendados.getLocation()
     const { height } = await driver.getWindowSize()
-    // El carrusel ocupa ~700px debajo del heading, tap point a ~350px abajo
     return Math.min(loc.y + 350, height - 200)
   }
 

@@ -1,10 +1,3 @@
-/**
- * Relevamiento de las validaciones del paso 1 (no dependen del OTP). NO es un test.
- *
- *   npx wdio run config/wdio.android.conf.ts --spec ./src/specs/recon/onboarding-validaciones.recon.ts --mochaOpts.retries 0 --mochaOpts.timeout 900000
- *
- * Valida de paso que OnboardingPage funciona contra la app real.
- */
 import OnboardingPage from '../../pages/Intramed/OnboardingPage-Intramed'
 import { buildDatosPersonales } from '../../utils/onboarding.data'
 import { dump } from './recon.helper'
@@ -16,7 +9,6 @@ describe('[recon] Onboarding — validaciones del paso 1', () => {
     await OnboardingPage.abrirRegistro()
     await dump('onb-val-00-inicial')
 
-    // ---- Emails con formato inválido ----
     for (const [i, invalido] of [
       'test@',
       'test.com',
@@ -30,7 +22,6 @@ describe('[recon] Onboarding — validaciones del paso 1', () => {
       )
     }
 
-    // ---- Formulario completo con un email YA REGISTRADO ----
     const datos = buildDatosPersonales({ email: EMAIL_REGISTRADO })
     await OnboardingPage.completarDatosPersonales(datos)
     await dump('onb-val-02-form-completo')
@@ -39,8 +30,6 @@ describe('[recon] Onboarding — validaciones del paso 1', () => {
     )
 
     await OnboardingPage.tocarSiguiente()
-    // El error de "ya registrado" puede llegar como modal que aparece y se va:
-    // se muestrea la ventana entera en vez de un único dump a los 8s.
     for (const ms of [1500, 1500, 2000, 3000, 5000, 8000]) {
       await driver.pause(ms)
       await dump(`onb-val-03-post-siguiente-${ms}`)

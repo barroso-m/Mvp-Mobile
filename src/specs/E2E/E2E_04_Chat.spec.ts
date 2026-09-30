@@ -2,13 +2,8 @@ import ChatPage from '../../pages/Intramed/ChatPage-Intramed'
 import { asegurarSesionEnFeed } from '../../utils/session.helper'
 import { step } from '../../utils/logger'
 
-/** Precondición de datos (cuenta de prueba): tiene que existir una conversación
- * YA ACEPTADA por el otro usuario. Las conversaciones pendientes de aprobación
- * (ej. "Dr. Chat Test") se abren SIN composer y muestran "Tienes que recibir la
- * aprobación del usuario..." en su lugar — no sirven para TC39. */
 const CONVERSACION_ACEPTADA = 'Ing. Tincho Barroso'
 
-/** Términos para el buscador de usuarios del panel "Nuevo". */
 const TERMINO_CON_RESULTADOS = 'Tin'
 const TERMINO_SIN_RESULTADOS = 'zzzzz999'
 
@@ -115,8 +110,6 @@ describe('[#chat] Mensajes', () => {
       ChatPage.buscarUsuario(TERMINO_CON_RESULTADOS),
     )
     await step('Validar que se listan usuarios', async () => {
-      // El hint de "mínimo 3 caracteres" desaparece al disparar la búsqueda, y
-      // la ausencia del empty state confirma que la respuesta trajo usuarios.
       await expect(ChatPage.hintMinimoCaracteres).not.toBeDisplayed()
       await expect(ChatPage.emptyStateSinUsuarios).not.toBeDisplayed()
     })
@@ -159,8 +152,6 @@ describe('[#chat] Mensajes', () => {
       async () => {
         const noLeidas = await ChatPage.conversacionesVisibles()
         const contador = await ChatPage.contadorNoLeidosNavbar()
-        // El contador de la navbar cuenta MENSAJES, no conversaciones: solo se
-        // puede afirmar que ambos indicadores coinciden en "hay / no hay".
         expect(contador > 0).toBe(noLeidas.length > 0)
       },
     )
@@ -200,8 +191,6 @@ describe('[#chat] Mensajes', () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
-    // Leer la pill parado en el Feed es parte del caso: tiene que ser visible
-    // desde cualquier tab, no solo dentro de Mensajes.
     await step('Validar que el tab Mensajes es visible desde el Feed', () =>
       expect(ChatPage.tabMensajes).toBeDisplayed(),
     )

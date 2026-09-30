@@ -17,8 +17,6 @@ describe('[#campus] Oferta académica (Campus)', () => {
       async () => {
         await expect(CampusPage.seccionMisInscripciones).toBeDisplayed()
         await expect(CampusPage.seccionRecomendados).toBeDisplayed()
-        // "Más formaciones disponibles" nace debajo del fold: la pantalla solo
-        // entra hasta Recomendados.
         await CampusPage.scrollHastaTexto('Más formaciones disponibles')
         await expect(CampusPage.seccionMasFormaciones).toBeDisplayed()
       },
@@ -96,9 +94,6 @@ describe('[#campus] Oferta académica (Campus)', () => {
       expect(badges.length).toBeGreaterThan(0)
       await expect(badges[0]).toBeDisplayed()
     })
-    // Mobile no expone un botón "Ir al aula" distinto (como en web): el acceso
-    // al curso inscripto se hace desde el mismo botón "Ver más" que muestran
-    // todas las cards. Se valida que ese botón esté presente y accesible.
     await step(
       'Validar que hay al menos un botón "Ver más" accesible',
       async () => {
@@ -117,7 +112,6 @@ describe('[#campus] Oferta académica (Campus)', () => {
       'Validar que estamos en el catálogo (flecha Go back + cards en lista)',
       async () => {
         await expect(CampusPage.btnGoBack).toBeDisplayed()
-        // Las secciones internas del tab Campus no existen en el catálogo.
         await expect(CampusPage.seccionMisInscripciones).not.toBeDisplayed()
         const cards = await CampusPage.cardsCatalogo
         expect(cards.length).toBeGreaterThan(0)

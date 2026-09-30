@@ -27,19 +27,6 @@ export class BasePage {
     }
   }
 
-  /**
-   * Toca un elemento que se acaba de traer con scroll.
-   *
-   * `mobile: scrollGesture` devuelve apenas lanza el fling, así que la lista
-   * puede seguir moviéndose cuando llega el tap — y el momentum se lo come. El
-   * síntoma es traicionero: el elemento SIGUE visible y el paso "tocar" pasa en
-   * verde; lo que falla es el paso siguiente, porque la pantalla nunca navegó.
-   * Así fallaban TC25 (el modal no abría) y TC26 (los chips de filtro no
-   * aparecían) el 2026-09-16, con ambos flujos andando perfecto a mano.
-   *
-   * Espera a que la posición vertical del elemento deje de cambiar antes de
-   * tocar.
-   */
   protected async tapCuandoQuieto(
     element: WdioElement,
     intentos = 10,
@@ -65,9 +52,6 @@ export class BasePage {
     })
   }
 
-  /** Scroll fino para buscar un campo específico sin pasarse de largo — un
-   * scrollDown() normal (75% de una franja de 600px) puede saltear un campo
-   * angosto en un formulario largo. */
   protected async scrollDownSmall(): Promise<void> {
     await driver.execute('mobile: scrollGesture', {
       left: 100,

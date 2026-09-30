@@ -5,27 +5,8 @@ import { step } from '../../utils/logger'
 
 const POST_TEXT = `post automation mobile ${Date.now()} 💪`
 
-// Todo lo que publica la suite, para que el `after` lo borre al terminar. Se
-// llena a medida que cada test publica: si se corre un subconjunto (por ej.
-// `--mochaOpts.grep TC18`), acá solo queda lo que esa corrida creó de verdad.
 const postsDeLaCorrida: string[] = []
 
-/**
- * Publica un post y lo registra para la limpieza final.
- *
- * Cada test que necesita un post lo crea acá y opera sobre él EN EL ACTO,
- * mientras sigue arriba del feed. No se puede reusar uno publicado antes: el
- * feed de Inicio es algorítmico y no garantiza contener tus propios posts
- * pasado ese momento — el 2026-09-15 se barrieron 20 pantallas desde el tope
- * sin encontrar ninguno de los 3 posts que esa misma corrida había publicado,
- * aunque los tres seguían existiendo (ver PENDIENTES.md).
- *
- * Eso es lo que jubiló al `POST_ESTABLE` del 07-sep, el post fijo que estos
- * tests usaban como "algún post del feed".
- *
- * `prefijoLimpieza` existe para los posts largos: llegan truncados al feed, así
- * que se los ubica y se los borra por prefijo y no por el texto completo.
- */
 async function publicarFixture(
   texto: string,
   prefijoLimpieza: string = texto,
@@ -36,27 +17,9 @@ async function publicarFixture(
   await FeedPage.waitForScreenReady()
 }
 
-// TC10, TC18 y TC19 solo LEEN el post: comparten, o abren y cancelan el modal
-// de Repostear. Ninguno lo consume y corren consecutivos, así que se reparten
-// uno solo en vez de publicar tres.
-//
-// El motivo es el cuelgue del publish: a partir del cuarto post de una misma
-// sesión, el composer se traba en el paso 2 con el botón en spinner y el
-// request no vuelve nunca (ver PENDIENTES.md, 2026-09-15). Cuantas menos
-// publicaciones por corrida, más lejos del umbral.
-//
-// El costo es la contracara: el post se publica en TC10 y TC19 lo usa un par de
-// minutos después, con el feed pudiendo refrescarse en el medio. Si estos tres
-// empiezan a fallar de forma intermitente con "el post no apareció en el feed",
-// el sospechoso es esta ventana.
 let postCompartido: string | undefined
 
 async function obtenerPostCompartido(): Promise<string> {
-  // No alcanza con memoizar: hay que confirmar que el feed TODAVÍA lo muestra.
-  // Si se memoiza a secas y el feed deja de mostrarlo, los tests que siguen
-  // fallan todos igual y —lo peor— el retry de Mocha recibe el mismo post
-  // muerto en 0ms, así que está condenado a fallar de nuevo. Pasó en la corrida
-  // del 2026-09-15: TC10/TC18/TC19/TC20 en rojo con sus dos intentos idénticos.
   if (postCompartido) {
     try {
       await FeedPage.esperarPostVisible(postCompartido, 15000)
@@ -74,8 +37,6 @@ async function obtenerPostCompartido(): Promise<string> {
 }
 
 describe('[#feed] Feed', () => {
-  // Sin esto la cuenta de prueba acumula un post por test y por corrida. La
-  // limpieza va por el perfil, no por el feed: ver `eliminarPostsDeLaCorrida`.
   after(async () => {
     await eliminarPostsDeLaCorrida(postsDeLaCorrida)
   })
@@ -158,21 +119,15 @@ describe('[#feed] Feed', () => {
     await step('Asegurar que el user está logueado', () =>
       asegurarSesionEnFeed(),
     )
-    // El relleno es lo que fuerza el truncado: sin él la app muestra el post
-    // entero y no hay ningún "Ver más" que tocar.
     const prefijoLargo = `fixture largo mobile ${Date.now()}`
     const postLargo = `${prefijoLargo} ${'texto de relleno para forzar el truncado de la publicacion. '.repeat(10)}`
 
     await step('Publicar un post largo', () =>
       publicarFixture(postLargo, prefijoLargo),
     )
-    // Un post largo llega truncado al feed: su TextView expone el texto
-    // cortado, así que se lo ubica por prefijo y no por igualdad exacta.
     await step('Localizar el post largo recién publicado', () =>
       FeedPage.esperarPostVisiblePorPrefijo(prefijoLargo),
     )
-    // Se apunta al "Ver más" de ESTE post y no al locator global: con más de un
-    // post largo en pantalla, el global expandía el que no era.
     await step('Validar que el post largo muestra "Ver más"', async () => {
       await expect(FeedPage.btnVerMasDePost(prefijoLargo)).toBeDisplayed()
     })
@@ -255,9 +210,6 @@ describe('[#feed] Feed', () => {
   })
 
   it('TC20 [IE-T49] - repostear una publicación y guardar/desguardar el repost', async () => {
-    // A diferencia de TC18/TC19, este test SÍ completa el repost, así que necesita
-    // un post propio y virgen: una vez reposteado, ESE post deja de abrir el
-    // modal de Repostear y no serviría para la próxima corrida.
     const post = `fixture repost mobile ${Date.now()}`
     const REPOST_TEXT = `repost automation mobile ${Date.now()} test automatico`
 

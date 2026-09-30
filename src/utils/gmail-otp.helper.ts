@@ -1,18 +1,3 @@
-/**
- * Lectura del código OTP de onboarding desde Gmail.
- *
- * El OTP de registro llega por EMAIL (remitente `info@intramed.net`), no por
- * SMS: `otp.helper.ts` —que lee el inbox de SMS del emulador— no sirve para
- * esta suite.
- *
- * Portado de `Intramed.MVP-Web/utils/gmail-otp.ts`, pero contra la API REST de
- * Gmail con `fetch` en vez del SDK `googleapis`, para no sumar una dependencia
- * pesada al repo mobile. Node 24 ya trae `fetch` global.
- *
- * Requiere en `.env`: GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET,
- * GMAIL_REFRESH_TOKEN y GMAIL_TEST_INBOX (ver `.env.example`).
- */
-
 const OTP_SENDER = 'info@intramed.net'
 const CODE_REGEX =
   /c[oó]digo de verificaci[oó]n:[\s\S]{0,400}?(?<![#\d])(\d{6})(?!\d)/i
@@ -24,7 +9,6 @@ interface GmailMessagePart {
   parts?: GmailMessagePart[]
 }
 
-/** Intercambia el refresh token por un access token de corta vida. */
 async function getAccessToken(): Promise<string> {
   const { GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN } =
     process.env
@@ -72,7 +56,6 @@ async function gmailGet<T>(path: string, accessToken: string): Promise<T> {
   return (await res.json()) as T
 }
 
-/** El cuerpo puede venir en la raíz o repartido en partes MIME anidadas. */
 function extractBody(part: GmailMessagePart | undefined): string {
   if (!part) return ''
   if (part.body?.data) {
@@ -85,8 +68,6 @@ function extractBody(part: GmailMessagePart | undefined): string {
 interface GetOtpCodeOptions {
   timeoutMs?: number
   pollIntervalMs?: number
-  /** Ignora mails anteriores a esta fecha — clave en `IE-T35`, que pide un
-   *  segundo código después de fallar con uno incorrecto. */
   sentAfter?: Date
 }
 
@@ -133,11 +114,6 @@ async function getOtpCode(
   )
 }
 
-/**
- * Arma un email único con plus-addressing sobre la casilla de prueba
- * (`automation+onb1234@gmail.com`). Gmail entrega todo al mismo inbox, así que
- * cada corrida registra una cuenta nueva sin pedir casillas nuevas.
- */
 function buildOnboardingTestEmail(label: string): string {
   const inbox = process.env.GMAIL_TEST_INBOX ?? 'automationintramed@gmail.com'
   const [user, domain] = inbox.split('@')

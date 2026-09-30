@@ -1,8 +1,3 @@
-/**
- * Utilidades compartidas por los specs de relevamiento (`*.recon.ts`).
- * No se usan en la suite: sirven para dumpear pantallas desconocidas sin que
- * un paso fallido corte la pasada.
- */
 import fs from 'fs'
 import path from 'path'
 
@@ -39,12 +34,6 @@ export async function volverArriba(): Promise<void> {
   for (let i = 0; i < 6; i++) await scroll('up', 0.9)
 }
 
-/**
- * Trae un elemento al viewport. Siempre arranca desde el tope del formulario:
- * si se busca hacia abajo a secas, un campo que no aparece deja el scroll
- * pasado de largo y los campos ANTERIORES quedan fuera de alcance (así se
- * perdieron Nombre y Apellido en la 1ª pasada).
- */
 export async function traerALaVista(selector: string): Promise<boolean> {
   if (
     await $(selector)
@@ -83,7 +72,6 @@ export function porHint(hint: string): string {
   return `//android.widget.EditText[@hint="${hint}"]`
 }
 
-/** Abre un selector, dumpea las opciones y elige la que matchee el texto. */
 export async function elegirEnSelector(
   selectorBoton: string,
   opcion: string,
@@ -107,11 +95,6 @@ export async function elegirEnSelector(
   await driver.pause(1500)
 }
 
-/**
- * El nodo CheckBox de términos ocupa la fila entera y su centro cae sobre el
- * texto, que es un LINK: tocarlo abre front.qa.intramed.net/intern/terms-of-use
- * en Chrome en vez de tildar. Hay que tocar el cuadradito, al borde izquierdo.
- */
 export async function tildarCheckbox(selector: string): Promise<void> {
   if (!(await traerALaVista(selector))) {
     console.log(`>>> no se pudo ubicar el checkbox ${selector}`)
@@ -128,7 +111,6 @@ export async function tildarCheckbox(selector: string): Promise<void> {
   console.log(`>>> ${selector} checked=${await el.getAttribute('checked')}`)
 }
 
-/** Toca "Siguiente" trayéndolo primero al viewport (nace fuera del árbol). */
 export async function tocarSiguiente(etapa: string): Promise<void> {
   await traerALaVista('~Siguiente')
   const btn = await $('~Siguiente')
@@ -143,7 +125,6 @@ export async function tocarSiguiente(etapa: string): Promise<void> {
   await driver.pause(6000)
 }
 
-/** Dumpea una pantalla desconocida: la entrada y lo que aparezca scrolleando. */
 export async function relevarPantalla(
   nombre: string,
   scrolls = 3,
@@ -156,7 +137,6 @@ export async function relevarPantalla(
   await volverArriba()
 }
 
-/** Toca un botón del wizard por content-desc ("Siguiente" o "Continuar"). */
 export async function tocarBoton(desc: string, etapa: string): Promise<void> {
   const selector = `~${desc}`
   await traerALaVista(selector)
@@ -172,10 +152,6 @@ export async function tocarBoton(desc: string, etapa: string): Promise<void> {
   await driver.pause(6000)
 }
 
-/**
- * Abre un selector y elige la PRIMERA opción del sheet, sin asumir qué valores
- * existen. Para relevar listas cuyo contenido todavía no se conoce.
- */
 export async function elegirPrimeraOpcion(
   selectorBoton: string,
   nombreDump: string,
@@ -188,8 +164,6 @@ export async function elegirPrimeraOpcion(
   await driver.pause(2500)
   await dump(nombreDump)
 
-  // Se saltea "-", que es el placeholder de algunos selectores (elegirlo deja
-  // el formulario inválido y "Continuar" deshabilitado, sin decir por qué).
   const primera =
     '(//android.view.ViewGroup[@clickable="true" and string-length(@content-desc)>0 and @content-desc!="-"])[1]'
   const el = await $(primera)

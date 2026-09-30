@@ -1,12 +1,3 @@
-/**
- * Relevamiento del wizard de registro COMPLETO. NO es un test.
- *
- *   npx wdio run config/wdio.android.conf.ts --spec ./src/specs/recon/onboarding-flujo.recon.ts --mochaOpts.retries 0 --mochaOpts.timeout 900000
- *
- * Crea una cuenta real en QA (plus-addressing sobre la casilla de automation),
- * lee el OTP de Gmail y dumpea cada pantalla del wizard hasta el final.
- * Best-effort de punta a punta: nunca corta, siempre deja evidencia.
- */
 import {
   dump,
   completarCampo,
@@ -36,7 +27,6 @@ describe('[recon] Onboarding — wizard completo', () => {
     await $('~Registrarse').click()
     await driver.pause(5000)
 
-    // ---- Paso 1: datos personales ----
     await elegirEnSelector(
       '//android.widget.Button[contains(@content-desc,"Seleccione")]',
       'Dr.',
@@ -55,14 +45,12 @@ describe('[recon] Onboarding — wizard completo', () => {
     await tildarCheckbox('~Aceptar términos y condiciones')
     await tocarSiguiente('paso1')
 
-    // ---- Paso 2: contraseña ----
     await relevarPantalla('onb-p2-password', 1)
     await completarCampo('//*[@resource-id="passwordInput"]', PASSWORD)
     await completarCampo('//*[@resource-id="confirmInput"]', PASSWORD)
     await dump('onb-p2-password-completo')
     await tocarSiguiente('paso2')
 
-    // ---- Paso 3: verificación por OTP ----
     await relevarPantalla('onb-p3-otp', 1)
     const code = await getOtpCode(email, { sentAfter: desdeCuando }).catch(
       (e) => {
@@ -73,8 +61,6 @@ describe('[recon] Onboarding — wizard completo', () => {
     console.log(`>>> OTP leído: ${code || '<vacío>'}`)
 
     if (code) {
-      // Sin saber todavía cómo está armado el input del código, se prueban las
-      // dos formas habituales: un EditText por dígito, o uno solo.
       const inputs = await $$('//android.widget.EditText')
       const cantidad = await inputs.length
       console.log(`>>> EditText en la pantalla de OTP: ${cantidad}`)
@@ -91,9 +77,6 @@ describe('[recon] Onboarding — wizard completo', () => {
       await tocarSiguiente('paso3')
     }
 
-    // ---- Paso 4: información de contacto ----
-    // Los triggers tienen resource-id propio; lo que no se sabe es cómo se
-    // ven las listas de opciones (son largas: países, provincias, ciudades).
     await relevarPantalla('onb-p4-contacto', 2)
     await elegirEnSelector(
       '//*[@resource-id="countryTrigger"]',
@@ -105,8 +88,6 @@ describe('[recon] Onboarding — wizard completo', () => {
       'Buenos Aires',
       'onb-p4-selector-provincia',
     )
-    // La lista de ciudades es alfabética y sin buscador: "25 de Mayo" es la
-    // primera, por eso la usa también la suite de web.
     await elegirEnSelector(
       '//*[@resource-id="cityTrigger"]',
       '25 de Mayo',
@@ -115,7 +96,6 @@ describe('[recon] Onboarding — wizard completo', () => {
     await dump('onb-p4-contacto-completo')
     await tocarSiguiente('paso4')
 
-    // ---- Paso 5: formación profesional (el botón acá es "Continuar") ----
     await relevarPantalla('onb-p5-profesional', 2)
     await elegirEnSelector(
       '//*[@resource-id="occupationTrigger"]',
@@ -127,14 +107,11 @@ describe('[recon] Onboarding — wizard completo', () => {
       'Medicina',
       'onb-p5-selector-carrera',
     )
-    // Al elegir carrera aparecen campos nuevos: especialidad, identidad
-    // profesional (tipo + número) y "¿Soy residente?".
     await relevarPantalla('onb-p5-profesional-con-carrera', 2)
     await elegirPrimeraOpcion(
       '//*[@resource-id="specialtyTrigger"]',
       'onb-p5-selector-especialidad',
     )
-    // Al elegir especialidad aparece "Subespecialidad *".
     await elegirPrimeraOpcion(
       '//*[@resource-id="subSpecialtyTrigger"]',
       'onb-p5-selector-subespecialidad',
@@ -148,7 +125,6 @@ describe('[recon] Onboarding — wizard completo', () => {
     await dump('onb-p5-profesional-completo')
     await tocarBoton('Continuar', 'paso5')
 
-    // ---- Paso 6: "¿Cómo conoció Intramed?" (tiene "Continuar" y "Saltear") ----
     await relevarPantalla('onb-p6-conocimiento', 1)
     await elegirPrimeraOpcion(
       '//*[@resource-id="discoverTrigger"]',
@@ -156,7 +132,6 @@ describe('[recon] Onboarding — wizard completo', () => {
     )
     await tocarBoton('Continuar', 'paso6')
 
-    // ---- Pantalla de éxito ----
     await relevarPantalla('onb-p7-exito', 2)
     for (const opcion of [
       'Completar mi perfil',
@@ -170,7 +145,6 @@ describe('[recon] Onboarding — wizard completo', () => {
       )
     }
 
-    // La pantalla final de web ofrece "Completar mi perfil" / "Omitir".
     for (const opcion of ['Completar mi perfil', 'Omitir']) {
       const visible = await traerALaVista(`~${opcion}`)
       console.log(`>>> "${opcion}" presente: ${visible}`)

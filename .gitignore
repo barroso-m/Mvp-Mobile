@@ -22,3 +22,12 @@ allure-report/
 # OS
 .DS_Store
 Thumbs.db
+
+# Notas de trabajo locales
+PENDIENTES.md
+
+# Husky: solo lo generado por npm install
+.husky/_/
+
+# Config local de Claude Code
+.claude/

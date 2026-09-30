@@ -200,14 +200,17 @@ Abrir el emulador desde Android Studio (paso 3) y esperar a que la pantalla de i
 
 ### 5.8. Correr los tests
 
-| Comando                         | Qué hace                                                                    |
-| ------------------------------- | --------------------------------------------------------------------------- |
-| `npm run test:android`          | Corre **todos** los casos en el emulador con la pantalla visible            |
-| `npm run test:android:headless` | Igual que el anterior pero sin mostrar la ventana del emulador (más rápido) |
-| `npm run test:android:login`    | Corre solo los casos de **Login**                                           |
-| `npm run test:android:feed`     | Corre solo los casos del **Feed** (crear post, reaccionar, comentar)        |
-| `npm run test:android:profile`  | Corre solo el caso de **Profile** (gestión de cuenta)                       |
-| `npm run report`                | Genera y abre el reporte de Allure con los resultados de la última corrida  |
+| Comando                           | Qué hace                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------- |
+| `npm run test:android`            | Corre **todos** los casos en el emulador con la pantalla visible            |
+| `npm run test:android:headless`   | Igual que el anterior pero sin mostrar la ventana del emulador (más rápido) |
+| `npm run test:android:login`      | Corre solo los casos de **Login**                                           |
+| `npm run test:android:feed`       | Corre solo los casos del **Feed** (crear post, reaccionar, comentar)        |
+| `npm run test:android:profile`    | Corre solo el caso de **Profile** (gestión de cuenta)                       |
+| `npm run test:android:chat`       | Corre solo los casos de **Chat** (conversaciones, solicitudes, búsqueda)    |
+| `npm run test:android:campus`     | Corre solo los casos de **Campus** (oferta académica, catálogo)             |
+| `npm run test:android:onboarding` | Corre solo los casos de **Onboarding** (registro de usuario)                |
+| `npm run report`                  | Genera y abre el reporte de Allure con los resultados de la última corrida  |
 
 Al terminar la suite, Allure abre automáticamente un reporte HTML con todos los pasos, capturas y videos. El reporte queda guardado en `allure-report/index.html` por si querés volver a abrirlo después.
 

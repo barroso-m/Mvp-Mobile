@@ -3,27 +3,27 @@
 > Generado a partir del cruce entre `Intramed.MVP-Web/tests/specs/E2E/` (54 casos / 7 specs)
 > y `Mobile/src/specs/E2E/` (43 casos / 5 specs).
 >
-> **Foco actual: Onboarding e Institution** (Login/Feed/Profile/Campus/Chat cerrados).
+> **Foco actual: Institution** (Login/Feed/Profile/Campus/Chat/Onboarding cerrados).
 
 ## Resumen numérico
 
-_Actualizado 2026-09-11, después de escribir los 5 casos pendientes de Chat._
+_Actualizado 2026-09-29, después de cerrar la suite de Onboarding._
 
-|                              | Casos  |
-| ---------------------------- | ------ |
-| Web                          | 54     |
-| Mobile                       | 43     |
-| **Web a portar (pendiente)** | **14** |
+|                              | Casos |
+| ---------------------------- | ----- |
+| Web                          | 54    |
+| Mobile                       | 48    |
+| **Web a portar (pendiente)** | **6** |
 
 Desglose de los 54 de web:
 
-|                                                                                                   | Casos  |
-| ------------------------------------------------------------------------------------------------- | ------ |
-| Ya cubiertos en mobile                                                                            | 36     |
-| Descartados (`IE-T55`, `IE-T57` web-only + `IE-T148` fuera de POC + `IE-T47` no existe en mobile) | 4      |
-| **Pendientes**                                                                                    | **14** |
+|                                                                                                                               | Casos |
+| ----------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Ya cubiertos en mobile                                                                                                        | 42    |
+| Descartados (`IE-T55`, `IE-T57` web-only + `IE-T148` fuera de POC + `IE-T47` no existe en mobile + `ONB-007` baja de cuentas) | 5     |
+| **Pendientes** (los 6 de Institution)                                                                                         | **6** |
 
-Los pendientes (Onboarding, Institution):
+Los pendientes (Institution):
 
 | Spec                | Faltantes | Condicionales |
 | ------------------- | --------- | ------------- |
@@ -32,9 +32,9 @@ Los pendientes (Onboarding, Institution):
 | Profile             | 0 ✅      | —             |
 | Campus              | 0 ✅      | —             |
 | Chat                | 0 ✅      | 1 (`IE-T73`)  |
-| Onboarding (nueva)  | 7         | —             |
+| Onboarding          | 0 ✅      | —             |
 | Institution (nueva) | 6         | —             |
-| **Total**           | **13**    | **1**         |
+| **Total**           | **6**     | **1**         |
 
 **Estado real (2026-09-15): la suite de Feed cierra 10/10 con limpieza incluida (ver
 abajo). Siguen 3 con código listo bloqueados por el cuelgue de instrumentación
@@ -775,16 +775,173 @@ arreglados en esta sesión):
   ("curso de prueba german", "Curso de Bienvenida"). Si en el futuro se
   desmatriculan todos, TC37 va a fallar hasta reinscribir uno.
 
-### `E2E_06_Onboarding.spec.ts` — spec inexistente, 6 casos
+### `E2E_06_Onboarding.spec.ts` — ✅ 0 faltantes (2026-09-29)
 
-`IE-T31` registro → Completar mi perfil · `IE-T32` registro → Omitir ·
-`IE-T33` email ya registrado · `IE-T34` email con formato inválido ·
-`IE-T35` código de verificación incorrecto · `IE-T36` campos obligatorios por paso
+| Web ID    | Caso                              | Mobile | Estado                     |
+| --------- | --------------------------------- | ------ | -------------------------- |
+| `IE-T31`  | Alta completa → entra a la app    | TC44   | ✅ verde                   |
+| `IE-T32`  | Alta completa salteando el final  | TC45   | ✅ verde                   |
+| `IE-T33`  | Email ya registrado               | TC46   | ✅ verde                   |
+| `IE-T34`  | Email con formato inválido        | TC47   | ✅ verde                   |
+| `IE-T35`  | Código de verificación incorrecto | TC48   | ✅ verde                   |
+| `IE-T36`  | Campos obligatorios (pasos 1 y 2) | TC49   | ✅ verde                   |
+| `ONB-007` | Baja de las cuentas creadas       | —      | ❌ descartado (2026-09-29) |
 
-Ya existe `src/utils/otp.helper.ts`. Falta definir si la baja de cuentas de prueba
-(`ONB-007` en web) se hace por webview o por API.
+Corre con `npm run test:android:onboarding` (~8:30 la suite entera).
 
-**Bloqueante:** no hay locators ni page object de Onboarding. Relevar pantallas primero.
+**El OTP se lee de Gmail.** `src/utils/gmail-otp.helper.ts` habla con la API REST
+de Gmail vía `fetch`, sin sumar `googleapis` como dependencia.
+`src/utils/otp.helper.ts` **no sirve acá**: lee el inbox de SMS del emulador, y el
+código de registro llega por email.
+
+Requiere `GMAIL_CLIENT_ID` / `GMAIL_CLIENT_SECRET` / `GMAIL_REFRESH_TOKEN` /
+`GMAIL_TEST_INBOX` en el `.env` (ver `.env.example`). **El refresh token caduca:**
+el 2026-09-29 estuvo revocado y devolvía `400 invalid_grant`, lo que dejó caídas
+las suites de onboarding de mobile Y de web. Se regenera con los scripts del repo
+web (`utils/gmail-auth-url.js` → consentimiento en el browser →
+`utils/gmail-get-refresh-token.js`) y hay que actualizarlo en los dos `.env`.
+
+**El wizard mobile tiene 6 pasos y NO termina como el de web.** No existe la
+pantalla de "¡Tu cuenta fue creada con éxito!" con "Completar mi perfil" /
+"Omitir": el alta entra directo a la app autenticada. Las dos ramas equivalentes
+son, en el último paso ("¿Cómo conoció Intramed?"), **"Continuar"** (TC44) contra
+**"Saltear"** (TC45).
+
+| Paso | `step-progress` | Pantalla                | Botón               |
+| ---- | --------------- | ----------------------- | ------------------- |
+| 1    | —               | Crear cuenta            | Siguiente           |
+| 2    | 1.0             | Crear contraseña        | Siguiente           |
+| 3    | —               | Verificación por código | (ninguno)           |
+| 4    | 2.0             | Información de contacto | Siguiente           |
+| 5    | 3.0             | Formación profesional   | Continuar           |
+| 6    | 4.0             | ¿Cómo conoció Intramed? | Continuar / Saltear |
+
+**Hallazgos del relevamiento de Onboarding (dumps en `recon/onb-*`):**
+
+- **El wizard es NATIVO, no un webview del signup web.** Tocando "Registrarse" el
+  package sigue siendo `com.intramed.core.staging` y el único contexto es
+  `NATIVE_APP`. No se reusa nada del `OnboardingPage` de Playwright.
+- **El formulario difiere del de web**, así que los casos no se portan 1:1: el
+  checkbox de términos está en el **paso 1** (en web está en el de contraseña), no
+  hay campo "Género", y sí hay "Fecha de nacimiento".
+- **Tocar el centro del checkbox de términos abre Chrome.** El nodo `CheckBox`
+  ocupa la fila entera y su centro cae sobre el texto, que es un link a
+  `front.qa.intramed.net/intern/terms-of-use`. Un `click()` normal saca al test de
+  la app. Hay que tocar el cuadradito del borde izquierdo —
+  `OnboardingPage.tildarTerminos()` lo hace con `clickGesture` en `x + 25`.
+- **El paso 2 ("Crear contraseña") es la única pantalla del wizard con
+  `resource-id` propios**: `passwordInput`, `confirmInput`, `passwordToggle`,
+  `confirmToggle`, más `step-progress` con el avance del formulario. Usarlos
+  antes que cualquier XPath posicional.
+- **El paso 1 no tiene "Go back"**: la única salida programática es el back de
+  hardware. El link "¿Ya está registrado? Iniciar sesión" NO sirve para volver —
+  lleva al formulario de login, donde ya no hay botón "Registrarse".
+  `asegurarPantallaInicial()` (en `session.helper.ts`) contempla los dos casos.
+- **El wizard RETIENE el estado entre entradas.** Al salir y volver a entrar, los
+  campos y el tilde de términos siguen como quedaron. Cualquier caso que dependa
+  de un formulario limpio tiene que construir esa precondición —
+  `asegurarTerminosDestildados()`.
+- **El selector de Trato no tiene content-desc estable**: arranca en
+  `"Seleccione, "` y pasa a `"<trato>, "` al elegir. Se ancla al label "Trato"
+  con eje `following::`. El de Tipo de documento sí es estable
+  (`~Abrir selector de tipo de documento`) y sus opciones traen `resource-id`
+  (`docTypeOption-DNI`, `docTypeOption-CC`, …).
+- **El apellido solo acepta letras.** Con un dígito la app muestra "El apellido
+  solo puede contener letras, espacios, puntos y apóstrofes" y deja "Siguiente"
+  deshabilitado — sin más señal que ese texto. Costó una corrida entera de
+  relevamiento: el generador de datos usaba un sufijo numérico.
+- **El email ya registrado se avisa en un bottom sheet, no inline**:
+  "¿Desea ingresar?" + "Parece que ya está registrado en IntraMed.", con botones
+  `account-exists-primary` ("Recuperar contraseña") y `account-exists-cancel`.
+  Tarda ~3s en llegar: un assert inmediato corre contra el paso 1 intacto.
+- **La franja de scroll de `BasePage` no engancha este formulario.**
+  `scrollDownSmall()` (400x600 en (100,800)) no movía la pantalla ni un pixel y
+  `scrollHastaCampo` moría con el formulario todavía en el tope. La que funciona
+  es 800x1000 en (100,600) — `OnboardingPage.scrollFormulario()`.
+- **El llenado tiene que ser forward-only**, con un reset explícito al tope antes
+  de empezar. Buscar cada campo en las dos direcciones deja el scroll pasado de
+  largo y los campos siguientes fuera de alcance.
+- **TC49 no entra en los 120s de mocha** (dos pasos completos + 4 consultas del
+  estado de "Siguiente", cada una scrolleando hasta el pie): lleva
+  `this.timeout(300000)` propio.
+
+- **El código de verificación se confirma solo.** La pantalla no tiene botón: al
+  cargar el 6º dígito la app verifica contra el backend, muestra "Tu correo ha
+  sido verificado correctamente." y avanza sola. Los 6 `EditText` (uno por
+  dígito) **nacen debajo del pliegue**: consultarlos sin scrollear devuelve lista
+  vacía (`OnboardingPage.inputsDelCodigo()`).
+- **Con un código incorrecto mobile no dice nada.** Web muestra "¡Código
+  incorrecto!"; acá la app simplemente limpia los inputs y se queda en la
+  pantalla. La única señal observable para `IE-T35` es que el wizard NO avanza,
+  y por eso `cargarCodigoSinEsperar()` existe aparte de `completarOtp()`.
+- **Los pasos 4 y 5 se despliegan de a un campo**: "Especialidad" recién aparece
+  al elegir carrera, y "Subespecialidad" al elegir especialidad. El orden de
+  llenado no es negociable.
+- **La primera opción del selector de identidad profesional es `-`**, un
+  placeholder que deja "Continuar" deshabilitado sin mostrar ningún error. Usar
+  "Matrícula Nacional" o similar.
+- **Una cuenta recién creada entra a la app SIN el botón "Crear"** (todavía no
+  está habilitada para publicar). Por eso `asegurarSesionEnFeed()` —que usa
+  "Crear" como señal de feed— nunca la reconoce, y `asegurarPantallaInicial()`
+  cierra sesión por el menú lateral apenas ve el bottom nav.
+
+**Tres formas distintas de matar la instrumentación, encontradas escribiendo
+TC44** (todas variantes del cuelgue que ya documenta este archivo):
+
+1. **Búsquedas XPath negativas en loop.** `irAlTopeDelFormulario()` chequeaba
+   varios títulos "por las dudas"; en las pantallas donde ninguno matchea son 2
+   barridos completos del árbol por vuelta × 8 vueltas. Ahora recibe el título
+   del paso y hace UNA búsqueda positiva.
+2. **`UiScrollable` sobre un sheet corto.** `scrollIntoView` resuelve las listas
+   largas (países, ciudades, especialidades) en un solo comando, pero cuando el
+   sheet entra entero en pantalla no hay ningún `scrollable(true)` que matchear
+   y se cuelga hasta tumbar la instrumentación. Quedó como último recurso,
+   después de un `waitForDisplayed` normal.
+3. **`findElement` contra el feed recién cargado.** El assert final de TC44/TC45
+   polleaba `~Inicio` justo cuando la app entra al feed. Se resolvió con un
+   `getPageSource` por vuelta y matching por string
+   (`esperarAppAutenticada()`), igual que `leerPantalla()` en `session.helper`.
+
+**La recuperación entre casos es el punto más frágil de la spec.**
+`asegurarPantallaInicial()` tiene que devolver la app a la pantalla inicial
+desde tres estados distintos —logueado en el feed, parado en cualquier paso del
+wizard, o logueado con una cuenta recién creada— y cada intento fallido de
+escribirla costó una spec entera en cascada:
+
+- El orden de los chequeos **no es cosmético**: se prueba primero "Inicio"
+  (positivo si estamos en el feed) para no llegar nunca a buscar algo que NO
+  está en el árbol del feed.
+- **No sirve resolverlo con `getPageSource`**, aunque sea el patrón de
+  `leerPantalla`: el del feed recién cargado no responde de forma confiable, el
+  `catch` devolvía string vacío y el helper no reconocía ningún estado.
+- **La pantalla de verificación no tiene `step-progress` ni título propio**: es
+  la única del wizard que hay que reconocer por su texto
+  ("Hemos enviado un código de verificación"). Sin eso, un caso que queda
+  parado ahí deja al siguiente sin forma de salir.
+
+**TC49 sigue necesitando el reintento de mocha de vez en cuando.** Es el caso
+más largo en comandos (dos pasos completos + 4 consultas del estado de
+"Siguiente", cada una scrolleando hasta el pie) y corre último, con el emulador
+ya cargado. No está diagnosticado más allá de eso.
+
+**El bottom sheet tarda en cerrarse** y su backdrop ocupa la pantalla entera: sin
+esperar a que desaparezca, el toque siguiente se lo come. El síntoma es
+traicionero — el paso da OK en 700ms y la pantalla no cambió.
+
+**El emulador se degrada con las horas.** Después de varias instrumentaciones
+caídas, TC44 fallaba de forma reproducible en pasos distintos; con el emulador
+reiniciado en frío pasó a la primera. Antes de seguir diagnosticando un caso
+largo, reiniciar.
+
+**`ONB-007` (baja de las cuentas de prueba) queda descartado** — decisión del
+2026-09-29: en mobile no se dan de baja las cuentas creadas. La suite de
+Onboarding cierra con 6 casos, no 7.
+
+Consecuencia asumida: **cada corrida crea 3 cuentas reales en QA**
+(`automationintramed+onb<timestamp>@gmail.com`, por plus-addressing sobre la
+casilla de automation). Se acumulan y nadie las limpia; el email es único por
+corrida, así que no chocan entre sí ni con la validación de "email ya
+registrado".
 
 ### `E2E_07_Institution.spec.ts` — spec inexistente, 6 casos
 

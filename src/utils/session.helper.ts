@@ -1,5 +1,7 @@
 import LoginPage from '../pages/Intramed/LoginPage-Intramed'
 import FeedPage from '../pages/Intramed/FeedPage-Intramed'
+import SideMenuPage from '../pages/Intramed/SideMenuPage-Intramed'
+import OnboardingPage from '../pages/Intramed/OnboardingPage-Intramed'
 
 type Pantalla = {
   login: boolean
@@ -158,4 +160,58 @@ export async function asegurarSesionEnFeed(): Promise<void> {
   }
 
   await FeedPage.waitForScreenReady()
+}
+
+/**
+ * Deja la app en la pantalla inicial (con "Iniciar sesión" / "Registrarse"),
+ * que es de donde arranca el wizard de registro.
+ *
+ * La suite comparte una sola sesión, así que acá se llega desde cualquier lado:
+ * logueado en el feed (las 5 specs anteriores), parado en cualquier paso del
+ * wizard (los casos de esta spec que no completan el alta) o logueado con una
+ * cuenta recién creada (TC44/TC45). Los tres casos se resuelven explícitamente;
+ * `asegurarSesionEnFeed` queda solo como último recurso, porque no sabe salir
+ * del wizard ni reconoce una cuenta nueva.
+ */
+export async function asegurarPantallaInicial(): Promise<void> {
+  await driver.hideKeyboard().catch(() => {})
+
+  // El orden importa y no es cosmético. Cada chequeo se hace con una búsqueda
+  // POSITIVA por accessibility-id (barata) y se prueba primero la que matchea
+  // en la pantalla más cara: si estamos en el feed, "Inicio" corta ahí mismo y
+  // nunca se llega a buscar algo que NO está en ese árbol —que es el patrón
+  // que cuelga la instrumentación—. Tampoco sirve un `getPageSource` acá: el
+  // del feed cargado no responde de forma confiable.
+  for (let intento = 0; intento < 5; intento++) {
+    // Logueado. Ojo: una cuenta recién registrada entra SIN el botón "Crear"
+    // (todavía no está habilitada para publicar), así que la señal es el tab
+    // "Inicio" y no "Crear" como en `asegurarSesionEnFeed`.
+    if (
+      await $('~Inicio')
+        .isDisplayed()
+        .catch(() => false)
+    ) {
+      await SideMenuPage.cerrarSesion()
+      await LoginPage.waitForScreenReady()
+      return
+    }
+
+    if (await LoginPage.btnRegistrarse.isDisplayed().catch(() => false)) {
+      return
+    }
+
+    if (await OnboardingPage.enElWizard()) {
+      await OnboardingPage.salirDelWizard()
+      continue
+    }
+
+    // Ni app, ni pantalla inicial, ni wizard: lo más probable es el feed
+    // todavía cargando después de un alta. Se le da tiempo antes de rendirse.
+    await driver.pause(3000)
+  }
+
+  // Último recurso: la recuperación genérica de la suite.
+  await asegurarSesionEnFeed()
+  await SideMenuPage.cerrarSesion()
+  await LoginPage.waitForScreenReady()
 }
